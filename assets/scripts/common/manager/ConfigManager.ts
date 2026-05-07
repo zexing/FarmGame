@@ -63,10 +63,13 @@ export class ConfigManager extends SingletonManager {
 
                                 cfg[keys[j]] = cellValue;
                             }
-
-                            // 默认所有配置表都必须有一个名为 'id' 的字段作为主键
+                            // 默认所有配置表都必须有一个名为 'id' 的字段
+                            // 并且紧跟着id的后一列要作为此配置表的逐渐
                             if (cfg.id !== undefined && cfg.id !== null) {
-                                tableMap.set(cfg.id, cfg);
+                                const only_key = keys[1];
+
+                                console.log(tableName + " only_key: ", only_key);
+                                tableMap.set(cfg[only_key], cfg);
                             } else {
                                 console.warn(`[ConfigManager] 表 [${tableName}] 第 ${i} 行缺失 'id' 主键字段！`);
                             }

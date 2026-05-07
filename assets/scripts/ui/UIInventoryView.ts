@@ -27,6 +27,8 @@
 
 import { _decorator } from 'cc';
 import { BaseUI } from '../common/ui/base/BaseUI';
+import { BaseUIView } from '../common/ui/base/BaseUIView';
+import { InventoryView } from '../game/inventory/InventoryView';
 
 const { ccclass, property } = _decorator;
 
@@ -38,35 +40,35 @@ const { ccclass, property } = _decorator;
 @ccclass('UIInventoryView')
 export class UIInventoryView extends BaseUI {
 
-    // /** 背包功能主体，挂在子节点上 */
-    // @property({ type: InventoryView, tooltip: '背包功能组件（InventoryView），挂在子节点上' })
-    // inventoryView: InventoryView = null!;
+    /** 背包功能主体，挂在子节点上 */
+    @property({ type: InventoryView, tooltip: '背包功能组件（InventoryView），挂在子节点上' })
+    inventoryView: InventoryView = null!;
 
-    // /** 通用界面组件：关闭按钮、遮罩、入场动画（可选） */
-    // private _baseUIView: BaseUIVew;
+    /** 通用界面组件：关闭按钮、遮罩、入场动画（可选） */
+    private _baseUIView: BaseUIView;
 
-    // // ── Cocos 生命周期 ────────────────────────────────────────────────────────
+    // ── Cocos 生命周期 ────────────────────────────────────────────────────────
 
-    // protected onLoad(): void {
-    //     this._baseUIView = this.node.getComponentInChildren(BaseUIVew);
-    // }
+    protected onLoad(): void {
+        this._baseUIView = this.node.getComponentInChildren(BaseUIView);
+    }
 
-    // // ── BaseUI 生命周期 ───────────────────────────────────────────────────────
+    // ── BaseUI 生命周期 ───────────────────────────────────────────────────────
 
-    // /**
-    //  * showView：UIManager 打开背包时调用
-    //  * 无需 params（数据来自 InventoryManager 单例）
-    //  */
-    // protected showView(_params: any): void {
-    //     super.showView(_params);
-    //     this._baseUIView?.showView();
-    //     this.inventoryView?.showView();
-    // }
+    /**
+     * showView：UIManager 打开背包时调用
+     * 无需 params（数据来自 InventoryManager 单例）
+     */
+    protected showView(_params: any): void {
+        super.showView(_params);
+        this._baseUIView?.showView();
+        this.inventoryView?.showView();
+    }
 
-    // /**
-    //  * closeView：UIManager 关闭背包时调用
-    //  */
-    // protected closeView(): void {
-    //     this.inventoryView?.closeView();
-    // }
+    /**
+     * closeView：UIManager 关闭背包时调用
+     */
+    protected closeView(): void {
+        this.inventoryView?.closeView();
+    }
 }

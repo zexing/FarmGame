@@ -2,7 +2,9 @@ import { EventKeyboard, input, Input, KeyCode } from 'cc';
 import { InputEvent } from '../../events/InputEvents';
 import { WorldTimeManager } from '../../game/world/WorldTimeManager';
 import { SingletonManager } from '../base/SingletonManager';
+import { UIID } from '../ui/base/UIConfig';
 import { EventManager } from './EventManager';
+import { UIManager } from './UIManager';
 
 export class InputManager extends SingletonManager {
 
@@ -66,6 +68,15 @@ export class InputManager extends SingletonManager {
             case KeyCode.KEY_N:
                 console.log("======== 🌙 主角上床睡觉 ========");
                 WorldTimeManager.getInstance().sleepToNextDay();
+                break;
+
+            // 🎒 呼出/关闭背包面板
+            case KeyCode.TAB:
+                if (UIManager.instance.getViewIsOpen(UIID.Inventory)) {
+                    UIManager.instance.closeView(UIID.Inventory);
+                } else {
+                    UIManager.instance.openView(UIID.Inventory);
+                }
                 break;
         }
     }

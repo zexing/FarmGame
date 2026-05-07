@@ -11,6 +11,7 @@ import { SystemEvent } from "../events/SystemEvents";
 import { BaseMVCController } from "../mvc/BaseMVCController";
 import { GameModel } from "./GameModel";
 import { GameView } from "./GameView";
+import { InventoryManager } from "./inventory/InventoryManager";
 import { IMapController } from "./map/IMap";
 import { IPlayercontroller } from "./player/IPlayer";
 import { ToolManager } from "./tool/ToolManager";
@@ -20,6 +21,7 @@ export class GameController extends BaseMVCController<GameModel, GameView> {
 
     protected onInit(): void {
         console.log("GameController onInit!!!!");
+        InventoryManager.instance.add("101", 5);
         // 👂 监听底层的飘字需求
         EventManager.getInstance().on(SystemEvent.GameTip, this._onGameTip, this);
     }
