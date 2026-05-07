@@ -1,0 +1,34 @@
+{
+    "maps": [
+        {
+            "fileName": "chunk_0_0.tmx",
+            "height": 3072,
+            "width": 4096,
+            "x": 0,
+            "y": 0
+        },
+        {
+            "fileName": "chunk_1_1.tmx",
+            "height": 3072,
+            "width": 4096,
+            "x": 0,
+            "y": 3072
+        },
+        {
+            "fileName": "chunk_1_0.tmx",
+            "height": 3072,
+            "width": 4096,
+            "x": 2048,
+            "y": 1536
+        },
+        {
+            "fileName": "chunk_0_1.tmx",
+            "height": 3072,
+            "width": 4096,
+            "x": -2048,
+            "y": 1536
+        }
+    ],
+    "onlyShowAdjacentMaps": false,
+    "type": "world"
+}

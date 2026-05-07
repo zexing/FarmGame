@@ -1,0 +1,83 @@
+
+guaiSSS5d.png
+size: 512,128
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+guaiSSS5d/01
+  rotate: false
+  xy: 136, 12
+  size: 112, 108
+  orig: 112, 108
+  offset: 0, 0
+  index: -1
+guaiSSS5d/02
+  rotate: false
+  xy: 250, 39
+  size: 100, 81
+  orig: 100, 81
+  offset: 0, 0
+  index: -1
+guaiSSS5d/bi1
+  rotate: false
+  xy: 434, 2
+  size: 43, 42
+  orig: 43, 42
+  offset: 0, 0
+  index: -1
+guaiSSS5d/bi2
+  rotate: false
+  xy: 307, 14
+  size: 40, 23
+  orig: 40, 23
+  offset: 0, 0
+  index: -1
+guaiSSS5d/nangua
+  rotate: false
+  xy: 446, 46
+  size: 44, 42
+  orig: 44, 42
+  offset: 0, 0
+  index: -1
+guaiSSS5d/sheng
+  rotate: false
+  xy: 492, 52
+  size: 9, 36
+  orig: 9, 36
+  offset: 0, 0
+  index: -1
+guaiSSS5d/shenti
+  rotate: true
+  xy: 352, 69
+  size: 51, 92
+  orig: 51, 92
+  offset: 0, 0
+  index: -1
+guaiSSS5d/shou
+  rotate: false
+  xy: 352, 23
+  size: 80, 44
+  orig: 80, 44
+  offset: 0, 0
+  index: -1
+guaiSSS5d/tou
+  rotate: true
+  xy: 2, 2
+  size: 118, 132
+  orig: 118, 132
+  offset: 0, 0
+  index: -1
+guaiSSS5d/tui
+  rotate: true
+  xy: 446, 90
+  size: 30, 59
+  orig: 30, 59
+  offset: 0, 0
+  index: -1
+guaiSSS5d/yan
+  rotate: false
+  xy: 250, 14
+  size: 55, 23
+  orig: 55, 23
+  offset: 0, 0
+  index: -1
