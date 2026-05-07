@@ -68,7 +68,7 @@ export class ConfigManager extends SingletonManager {
                             if (cfg.id !== undefined && cfg.id !== null) {
                                 const only_key = keys[1];
 
-                                console.log(tableName + " only_key: ", only_key);
+                                // console.log(tableName + " only_key: ", only_key);
                                 tableMap.set(cfg[only_key], cfg);
                             } else {
                                 console.warn(`[ConfigManager] 表 [${tableName}] 第 ${i} 行缺失 'id' 主键字段！`);

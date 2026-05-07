@@ -1,17 +1,14 @@
-import { _decorator, Node, Size, UITransform, v3, Vec3 } from 'cc';
+import { _decorator, Node, Size, UITransform } from 'cc';
 import { PoolManager } from 'db://assets/scripts/common/manager/PoolManager';
 import { ECellState, MapConst } from 'db://assets/scripts/const/GameDefine';
 import { createDefaultCellData, ICellData, IMapModel, IMapView } from 'db://assets/scripts/game/map/IMap';
 import { EventManager } from '../../../common/manager/EventManager';
 import { FarmEvent, PlayerEvent, SystemEvent, TimeEvent } from '../../../events';
 import { BaseMVCSubCtrl } from '../../../mvc/BaseMVCSubCtrl';
-import { CropEntity } from '../crop_entity/CropEntity';
+import { IsoUtils } from '../IsoUtils';
 import { GroundGridCell } from './GroundGridCell';
 
 const { ccclass, property } = _decorator;
-
-// const VIEWPORT_ROWS = 14;
-// const VIEWPORT_COLS = 14;
 
 @ccclass('GroundGridCtrl')
 export class GroundGridCtrl extends BaseMVCSubCtrl {
@@ -25,12 +22,6 @@ export class GroundGridCtrl extends BaseMVCSubCtrl {
     private _viewCenterRow: number = -1;
     private _viewCenterCol: number = -1;
     private _currentZoomRatio: number = 1.0;
-
-
-
-    // 🌟 新增：独立管理作物实体的池子与映射字典
-    private _cropPool: Node[] = [];
-    private _activeCrops: Map<string, Node> = new Map();
 
 
     public init(model: IMapModel, view: IMapView): void {
@@ -66,6 +57,7 @@ export class GroundGridCtrl extends BaseMVCSubCtrl {
 
 
     /***********************************事件监听***************************************************** */
+
     private _onCellStateChanged(payload: { row: number, col: number, newState: ECellState }): void {
         const { row, col, newState } = payload;
         const key = `${row},${col}`;
@@ -83,9 +75,6 @@ export class GroundGridCtrl extends BaseMVCSubCtrl {
             }
         }
 
-
-        // 2. 🌟 同步作物实体
-        this._syncCropEntity(row, col, cellData);
     }
 
     private _onCameraZoomChanged(payload: { zoomRatio: number }): void {
@@ -102,9 +91,16 @@ export class GroundGridCtrl extends BaseMVCSubCtrl {
 
         this._view.cursorNode.active = true;
         // 使用同样的神圣坐标转换，光标绝对能完美扣在那个格子上！
-        this._view.cursorNode.setPosition(this.isoToScreen(payload.row, payload.col));
+        this._view.cursorNode.setPosition(IsoUtils.isoToScreen(payload.row, payload.col));
 
     }
+
+
+
+
+
+
+
 
 
 
@@ -121,8 +117,6 @@ export class GroundGridCtrl extends BaseMVCSubCtrl {
         );
         this._activeNodes.clear();
 
-        // ✅ 修复点 2：去掉了全量 instantiate 的错误循环。
-        // 网格的生成必须全部交给 updateViewport 去动态处理！
     }
 
     public refreshAll(): void {
@@ -137,10 +131,6 @@ export class GroundGridCtrl extends BaseMVCSubCtrl {
             }
         });
 
-        // 🌟 全量刷新作物
-        this._model.forEachCellData((cell, r, c) => {
-            this._syncCropEntity(r, c, cell);
-        });
     }
 
     public refreshCell(row: number, col: number, cellData: ICellData): void {
@@ -152,18 +142,6 @@ export class GroundGridCtrl extends BaseMVCSubCtrl {
         }
     }
 
-    public isoToScreen(row: number, col: number): Vec3 {
-        const x = (col - row) * (MapConst.CELL_WIDTH / 2);
-        const y = -(col + row) * (MapConst.CELL_HEIGHT / 2);
-        return v3(x, y, 0);
-    }
-
-    public screenToIso(x: number, y: number): { row: number, col: number } {
-        const col = Math.floor((x / (MapConst.CELL_WIDTH / 2) - y / (MapConst.CELL_HEIGHT / 2)) / 2);
-        const row = Math.floor((-x / (MapConst.CELL_WIDTH / 2) - y / (MapConst.CELL_HEIGHT / 2)) / 2);
-        return { row, col };
-    }
-
     public updateViewport(centerRow: number, centerCol: number): void {
 
         // 如果中心点没变，直接跳过，节省性能
@@ -171,7 +149,6 @@ export class GroundGridCtrl extends BaseMVCSubCtrl {
         this._viewCenterRow = centerRow;
         this._viewCenterCol = centerCol;
         this._caculateVisibleRowCol();
-        this._sortGridCells();
     }
 
     private _caculateVisibleRowCol(): void {
@@ -182,11 +159,8 @@ export class GroundGridCtrl extends BaseMVCSubCtrl {
         view_size.width *= this._currentZoomRatio;
         view_size.height *= this._currentZoomRatio;
 
-        const view_port_rows = Math.ceil(view_size.width / MapConst.CELL_WIDTH) + 4;
-        const view_port_cols = Math.ceil(view_size.height / MapConst.CELL_HEIGHT) + 4;
-
-        // const dynamicViewWidth = Math.ceil(view_port_rows * this._currentZoomRatio);
-        // const dynamicViewHeight = Math.ceil(view_port_cols * this._currentZoomRatio);
+        const view_port_rows = Math.ceil(view_size.width / MapConst.CELL_WIDTH) + MapConst.EXTRA_VIEWPORT_ROW;
+        const view_port_cols = Math.ceil(view_size.height / MapConst.CELL_HEIGHT) + MapConst.EXTRA_VIEWPORT_COL;
 
         const halfR = Math.round(view_port_rows / 2);
         const halfC = Math.round(view_port_cols / 2);
@@ -200,6 +174,7 @@ export class GroundGridCtrl extends BaseMVCSubCtrl {
     }
 
     private _updateVisableCells(minRow: number, maxRow: number, minCol: number, maxCol: number) {
+        console.log(`_updateVisableCells: ${minRow}   ${maxRow}  ${minCol}  ${maxCol}`);
         const targetKeys = new Set<string>();
         for (let r = minRow; r <= maxRow; r++) {
             for (let c = minCol; c <= maxCol; c++) {
@@ -232,7 +207,7 @@ export class GroundGridCtrl extends BaseMVCSubCtrl {
                 // 从对象池取节点并放入场景
                 const node = PoolManager.getInstance().getNode(this._view.groundCellPrefab, this._view.gridContainer);
                 node.name = `Cell_${r}_${c}`;
-                node.setPosition(this.isoToScreen(r, c));
+                node.setPosition(IsoUtils.isoToScreen(r, c));
                 this._activeNodes.set(key, node);
 
                 isNewNodeAdded = true;
@@ -270,75 +245,5 @@ export class GroundGridCtrl extends BaseMVCSubCtrl {
         }
     }
 
-    /**
-     * 🌟 地块自我深度排序：Y坐标越大（越靠上），渲染越早（层级越低）
-     */
-    private _sortGridCells(): void {
-        if (!this._view || !this._view.gridContainer) return;
-
-        // 浅拷贝 children 数组
-        const children = this._view.gridContainer.children.slice();
-
-        // 按照 Y 坐标降序排列
-        children.sort((a, b) => b.position.y - a.position.y);
-
-        // 只有顺序真正发生错位时，才通知底层引擎重排，极大节约性能
-        children.forEach((child, index) => {
-            if (child.getSiblingIndex() !== index) {
-                child.setSiblingIndex(index);
-            }
-        });
-    }
-
-
-    /**
-         * 🌟 作物实体的生成与回收逻辑 (全权交由 PoolManager 托管)
-         */
-    private _syncCropEntity(row: number, col: number, cell: ICellData): void {
-        const key = `${row}_${col}`;
-        const hasCrop = (cell.state === ECellState.Planted || cell.state === ECellState.Harvestable || cell.state === ECellState.Withered);
-
-        if (hasCrop) {
-            let cropNode = this._activeCrops.get(key);
-            if (!cropNode) {
-                // 🌟 净化 1：直接向全局对象池索要！(内部自带实例化兜底)
-                cropNode = PoolManager.instance.getNode(this._view.cropPrefab, this._view.entityContainer);
-
-                // 设置绝对坐标
-                cropNode.setPosition(this.isoToScreen(row, col));
-                this._activeCrops.set(key, cropNode);
-
-                // 因为加入了新节点，实体层进行一次 Y-Sort 排序
-                this._sortEntityContainer();
-            }
-            // 刷新贴图
-            cropNode.getComponent(CropEntity)?.refresh(cell);
-
-        } else {
-            // 如果地块没有作物，但字典里有，说明被收割了，立刻回收！
-            let cropNode = this._activeCrops.get(key);
-            if (cropNode) {
-                // 🌟 净化 2：调用你的全局回收方法 (请根据你 PoolManager 的实际方法名调整，通常是 putNode 或 releaseNode)
-                PoolManager.instance.putNode(cropNode);
-                this._activeCrops.delete(key);
-            }
-        }
-    }
-
-    /**
-     * 🌟 对实体层进行纯粹的静态排序
-     */
-    private _sortEntityContainer(): void {
-        if (!this._view.entityContainer) return;
-        const entities = this._view.entityContainer.children.slice();
-        entities.sort((a, b) => b.position.y - a.position.y);
-
-        entities.forEach((child, index) => {
-            if (child.name === 'Player') return; // 主角自己会动态插值
-            if (child.getSiblingIndex() !== index) {
-                child.setSiblingIndex(index);
-            }
-        });
-    }
 
 }

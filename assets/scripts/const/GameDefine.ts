@@ -244,7 +244,10 @@ export namespace MapConst {
     // 🌟 新增：大世界区块配置
     export const CHUNK_SIZE = 32;      // 每个区块的标准格子数 (32x32)
     export const WORLD_CHUNKS_ROW = 2;  // 大世界纵向有多少个区块 (行)
-    export const WORLD_CHUNKS_COL = 2;   // 大世界横向有多少个区块 (列)
+    export const WORLD_CHUNKS_COL = 2;   // 大世界横向有多少个区块 (列);
+
+    export const EXTRA_VIEWPORT_ROW = 8;    //额外多展示的视口横向格子数（防止穿帮）
+    export const EXTRA_VIEWPORT_COL = 8;    //额外多展示的视口纵向格子数（防止穿帮）
 }
 
 

@@ -1,4 +1,4 @@
-import { _decorator, Color, Sprite } from 'cc';
+import { _decorator, Color, Label, Sprite } from 'cc';
 import { ICellData } from 'db://assets/scripts/game/map/IMap';
 import { BaseComponent } from '../../../common/base/BaseComponent';
 import { ECellState } from '../../../const/GameDefine';
@@ -13,6 +13,9 @@ export class GroundGridCell extends BaseComponent {
     @property({ type: Sprite, tooltip: "泥土地表" })
     soilSprite: Sprite = null!;
 
+    @property(Label)
+    lblRowCol: Label = null
+
     // 🌟 cropSprite 已经被删除了！
 
     public refresh(data: ICellData): void {
@@ -23,5 +26,6 @@ export class GroundGridCell extends BaseComponent {
             this.soilSprite.node.active = true;
             this.soilSprite.color = data.isWatered ? WET_COLOR : DRY_COLOR;
         }
+        this.lblRowCol.string = `${data.row}_${data.col}`;
     }
 }
