@@ -109,6 +109,7 @@ export class GroundGridCtrl extends BaseMVCSubCtrl {
         this._viewCenterRow = centerRow;
         this._viewCenterCol = centerCol;
         this._caculateVisibleRowCol();
+        this._sortGridCells();
     }
 
     private _caculateVisibleRowCol(): void {
@@ -206,6 +207,30 @@ export class GroundGridCtrl extends BaseMVCSubCtrl {
             }
         }
     }
+
+    /**
+     * 🌟 地块自我深度排序：Y坐标越大（越靠上），渲染越早（层级越低）
+     */
+    private _sortGridCells(): void {
+        if (!this._view || !this._view.gridContainer) return;
+
+        // 浅拷贝 children 数组
+        const children = this._view.gridContainer.children.slice();
+
+        // 按照 Y 坐标降序排列
+        children.sort((a, b) => b.position.y - a.position.y);
+
+        // 只有顺序真正发生错位时，才通知底层引擎重排，极大节约性能
+        children.forEach((child, index) => {
+            if (child.getSiblingIndex() !== index) {
+                child.setSiblingIndex(index);
+            }
+        });
+    }
+
+
+
+
 
     private _onCellStateChanged(payload: { row: number, col: number, newState: ECellState }): void {
         const { row, col, newState } = payload;

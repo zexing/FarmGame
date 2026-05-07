@@ -1,4 +1,4 @@
-import { _decorator, Color, Sprite } from 'cc';
+import { _decorator, Color, resources, Sprite, SpriteFrame } from 'cc';
 import { ICellData } from 'db://assets/scripts/game/map/IMap';
 import { BaseComponent } from '../../../common/base/BaseComponent';
 import { ECellState } from '../../../const/GameDefine';
@@ -31,10 +31,28 @@ export class GroundGridCell extends BaseComponent {
             this.soilSprite.color = data.isWatered ? WET_COLOR : DRY_COLOR;
         }
 
-        // 2. 作物层逻辑 (暂时用颜色或者简单的 active 代替，等会儿我们再接真实的作物图集)
+        // 2. 作物层逻辑
         if (data.state === ECellState.Planted || data.state === ECellState.Harvestable || data.state === ECellState.Withered) {
             this.cropSprite.node.active = true;
-            // TODO: 根据 data.cropId 和 data.growStage 动态加载并替换 cropSprite 的 spriteFrame
+            
+            // 路径结尾必须加上 /spriteFrame，这是 Cocos 3.x 动态加载 SpriteFrame 的强制要求
+            const imagePath = `textures/crop/crop_${data.cropId}_${data.growStage}/spriteFrame`;
+            
+            resources.load(imagePath, SpriteFrame, (err, frame) => {
+                if (err) {
+                    // 如果因为还没来得及切图而找不到文件，我们做一个绿色的兜底色块，防止报错卡死
+                    console.warn(`[GroundGridCell] 贴图加载失败: ${imagePath}，使用默认色块兜底。`);
+                    const greenValue = Math.max(50, 255 - data.growStage * 60);
+                    this.cropSprite.color = new Color(0, greenValue, 0, 255);
+                    return;
+                }
+                
+                // 确保加载回来时，这个格子还没被对象池回收或销毁
+                if (this.isValid && this.cropSprite) {
+                    this.cropSprite.spriteFrame = frame;
+                    this.cropSprite.color = Color.WHITE; // 恢复正常颜色
+                }
+            });
         } else {
             this.cropSprite.node.active = false;
         }

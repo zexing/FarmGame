@@ -27,11 +27,11 @@ export class PlayerView extends BaseMVCView<PlayerModel, PlayerController> {
     public moveSpeed: number = 1000;
 
     //碰撞检测 脚底碰撞匣宽度
-    @property({tooltip: "碰撞检测 脚底碰撞匣宽度"})
+    @property({ tooltip: "碰撞检测 脚底碰撞匣宽度" })
     public hitboxWidth: number = 40;
 
     //碰撞检测 脚底碰撞匣高度
-    @property({tooltip: "碰撞检测 脚底碰撞匣高度"})
+    @property({ tooltip: "碰撞检测 脚底碰撞匣高度" })
     public hitboxHeight: number = 20;
 
     @property({ type: JoystickView, tooltip: "虚拟摇杆组件引用" })
@@ -217,20 +217,38 @@ export class PlayerView extends BaseMVCView<PlayerModel, PlayerController> {
     // }
 
     /**
-     * 深度排序 (Z-Index 优化)
-     * 在 2D Isometric 中，Y 坐标越低，节点越靠前
+     * 🌟 深度排序 (Z-Index 优化)
+     * 极速插值法：不整体排序，只更新主角自身的层级！
      */
     private _updateZIndex(): void {
-        // 技巧：利用节点在父节点下的 SiblingIndex 来模拟深度
-        // 我们假设地图上的所有物体（主角、树、建筑）都在同一个 Parent 下
-        // 逻辑：Y 越小，SiblingIndex 越大
-
         const parent = this.node.parent;
         if (!parent) return;
 
-        // 注意：在大规模地图中，每一帧排序所有节点很吃性能
-        // 正式项目建议使用 `UITransform` 的优先级或定时器触发排序
-        // 这里提供一个简单的逻辑思路：
-        // this.node.setSiblingIndex(1000 - Math.floor(this.node.y));
+        // ⚠️ 获取主角当前的真实逻辑 Y 坐标
+        // 如果你的主角和农作物锚点都在中心(0.5, 0.5)，这里可以直接用 y。
+        // 如果发生脚部穿模，说明锚点不统一，可以加上你的脚底碰撞匣偏移量，如：myY = this.node.position.y - this.hitboxHeight;
+        const myY = this.node.position.y;
+
+        let targetIndex = 0;
+        const children = parent.children;
+        const len = children.length;
+
+        // 扫视所有兄弟节点
+        for (let i = 0; i < len; i++) {
+            const child = children[i];
+            // 跳过自己
+            if (child === this.node) continue;
+
+            // Y 坐标越大的节点（越靠屏幕上方），渲染越早。
+            // 所以只要遇到一个比我 Y 坐标大的，我的目标层级就往后推一位。
+            if (child.position.y > myY) {
+                targetIndex++;
+            }
+        }
+
+        // 仅当层级发生变化时才引发底层重绘，性能拉满！
+        if (this.node.getSiblingIndex() !== targetIndex) {
+            this.node.setSiblingIndex(targetIndex);
+        }
     }
 }
