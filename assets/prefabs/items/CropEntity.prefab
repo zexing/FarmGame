@@ -1,7 +1,7 @@
 [
   {
     "__type__": "cc.Prefab",
-    "_name": "GroundGridCell",
+    "_name": "CropEntity",
     "_objFlags": 0,
     "__editorExtras__": {},
     "_native": "",
@@ -13,7 +13,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "GroundGridCell",
+    "_name": "CropEntity",
     "_objFlags": 0,
     "__editorExtras__": {},
     "_parent": null,
@@ -65,7 +65,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "soilSprite",
+    "_name": "cropSprite",
     "_objFlags": 0,
     "__editorExtras__": {},
     "_parent": {
@@ -127,19 +127,19 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 130,
-      "height": 130
+      "width": 128,
+      "height": 128
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
       "x": 0.5,
-      "y": 0.5
+      "y": 0
     },
     "_id": ""
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "027Lq+ICpDdJItB/PdTnux"
+    "fileId": "07l0GE3t1Ir56RTax2aEn/"
   },
   {
     "__type__": "cc.Sprite",
@@ -164,7 +164,7 @@
       "a": 255
     },
     "_spriteFrame": {
-      "__uuid__": "0acc474d-24f7-4622-ade9-7533114000a0@f9941",
+      "__uuid__": "416adb61-07db-429e-a0c1-de6065c8bbd0@f9941",
       "__expectedType__": "cc.SpriteFrame"
     },
     "_type": 0,
@@ -184,7 +184,7 @@
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "4d+EUYSERL8r4++gjPqbQO"
+    "fileId": "21I/SWgZVJn4mClbgjXLXn"
   },
   {
     "__type__": "cc.PrefabInfo",
@@ -194,7 +194,7 @@
     "asset": {
       "__id__": 0
     },
-    "fileId": "67zVvegoNFL5M/+9kda22g",
+    "fileId": "3f27WCTk9LoanHHgsYJ9Ls",
     "instance": null,
     "targetOverrides": null,
     "nestedPrefabInstanceRoots": null
@@ -228,7 +228,7 @@
     "fileId": "9eGJbeYidDnr636ohhJKMq"
   },
   {
-    "__type__": "5166cvA1uNAeonbIEl6Oi9t",
+    "__type__": "b1fe4e3WM9FVY0MDV1QfHPY",
     "_name": "",
     "_objFlags": 0,
     "__editorExtras__": {},
@@ -239,15 +239,14 @@
     "__prefab": {
       "__id__": 11
     },
-    "soilSprite": {
+    "cropSprite": {
       "__id__": 5
     },
-    "cropSprite": null,
     "_id": ""
   },
   {
     "__type__": "cc.CompPrefabInfo",
-    "fileId": "51RMFwzjxBNao0LIggINAy"
+    "fileId": "e7c7eCqxhOuZHxXVMuaqsK"
   },
   {
     "__type__": "cc.PrefabInfo",

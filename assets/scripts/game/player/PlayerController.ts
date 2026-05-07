@@ -8,6 +8,7 @@ import { PlayerEvent, SystemEvent } from '../../events';
 import { InputEvent } from '../../events/InputEvents';
 import { BaseMVCController } from '../../mvc/BaseMVCController';
 import { IMapController } from '../map/IMap';
+import { IsoUtils } from '../map/IsoUtils';
 import { IToolContext } from '../tool/ITool';
 import { ToolManager } from '../tool/ToolManager';
 import { IPlayercontroller } from './IPlayer';
@@ -89,7 +90,7 @@ export class PlayerController extends BaseMVCController<PlayerModel, PlayerView>
         
 
         // 获取出生点的屏幕坐标
-        const spawnPos = mapCtrl.isoToScreen(startRow, startCol);
+        const spawnPos = IsoUtils.isoToScreen(startRow, startCol);
 
         // 界面更新坐标
         this.view.updatePlayerPos(spawnPos)
@@ -123,7 +124,7 @@ export class PlayerController extends BaseMVCController<PlayerModel, PlayerView>
 
         for (const corner of corners) {
             // 利用优先级 1 写好的公式，将屏幕坐标转为网格坐标
-            const gridPos = mapCtrl.screenToIso(corner.x, corner.y);
+            const gridPos = IsoUtils.screenToIso(corner.x, corner.y);
 
             // 如果这个角碰到了障碍物，立刻返回 true (发生碰撞)
             if (this.isCellBlocked(gridPos.row, gridPos.col)) {
@@ -175,7 +176,7 @@ export class PlayerController extends BaseMVCController<PlayerModel, PlayerView>
         if (!mapCtrl) return;
 
         // 直接用底层神圣公式，算出主角看向的真实逻辑格子！
-        const gridPos = mapCtrl.screenToIso(targetScreenX, targetScreenY);
+        const gridPos = IsoUtils.screenToIso(targetScreenX, targetScreenY);
 
         const maxRow = mapCtrl.getRows();
         const maxCol = mapCtrl.getCols();
@@ -197,7 +198,7 @@ export class PlayerController extends BaseMVCController<PlayerModel, PlayerView>
         const mapCtrl = ServiceLocator.get<IMapController>(ServiceKey.IMapController);
         if (!mapCtrl) return;
 
-        const gridPos = mapCtrl.screenToIso(x, y);
+        const gridPos = IsoUtils.screenToIso(x, y);
 
         // 动态获取真实地图边界
         const maxRow = mapCtrl.getRows();

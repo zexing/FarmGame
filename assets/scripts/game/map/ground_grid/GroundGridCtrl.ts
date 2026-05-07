@@ -5,6 +5,7 @@ import { createDefaultCellData, ICellData, IMapModel, IMapView } from 'db://asse
 import { EventManager } from '../../../common/manager/EventManager';
 import { FarmEvent, PlayerEvent, SystemEvent, TimeEvent } from '../../../events';
 import { BaseMVCSubCtrl } from '../../../mvc/BaseMVCSubCtrl';
+import { CropEntity } from '../crop_entity/CropEntity';
 import { GroundGridCell } from './GroundGridCell';
 
 const { ccclass, property } = _decorator;
@@ -24,6 +25,13 @@ export class GroundGridCtrl extends BaseMVCSubCtrl {
     private _viewCenterRow: number = -1;
     private _viewCenterCol: number = -1;
     private _currentZoomRatio: number = 1.0;
+
+
+
+    // 🌟 新增：独立管理作物实体的池子与映射字典
+    private _cropPool: Node[] = [];
+    private _activeCrops: Map<string, Node> = new Map();
+
 
     public init(model: IMapModel, view: IMapView): void {
         super.init(model, view);
@@ -54,6 +62,55 @@ export class GroundGridCtrl extends BaseMVCSubCtrl {
         super.destroy();
     }
 
+
+
+
+    /***********************************事件监听***************************************************** */
+    private _onCellStateChanged(payload: { row: number, col: number, newState: ECellState }): void {
+        const { row, col, newState } = payload;
+        const key = `${row},${col}`;
+
+        const cellData = this._model.getCellData(row, col);
+        if (cellData) {
+            cellData.state = newState;
+        }
+        // ✅ 修复点 4：从活跃节点 Map 中获取对应的节点进行刷新
+        const node = this._activeNodes.get(key);
+        if (node) {
+            const cellCtrl = node.getComponent(GroundGridCell);
+            if (cellCtrl) {
+                cellCtrl.refresh(cellData);
+            }
+        }
+
+
+        // 2. 🌟 同步作物实体
+        this._syncCropEntity(row, col, cellData);
+    }
+
+    private _onCameraZoomChanged(payload: { zoomRatio: number }): void {
+        this._currentZoomRatio = payload.zoomRatio;
+        this._caculateVisibleRowCol();
+    }
+
+    private _onScreenSizeChanged() {
+        this._caculateVisibleRowCol();
+    }
+
+    private _onTargetChanged(payload: { row: number, col: number }): void {
+        if (!this._view.cursorNode) return;
+
+        this._view.cursorNode.active = true;
+        // 使用同样的神圣坐标转换，光标绝对能完美扣在那个格子上！
+        this._view.cursorNode.setPosition(this.isoToScreen(payload.row, payload.col));
+
+    }
+
+
+
+
+
+
     public initGridNodes(): void {
 
         this._view.gridContainer.removeAllChildren();
@@ -78,6 +135,11 @@ export class GroundGridCtrl extends BaseMVCSubCtrl {
             if (cellData) {
                 this.refreshCell(r, c, cellData);
             }
+        });
+
+        // 🌟 全量刷新作物
+        this._model.forEachCellData((cell, r, c) => {
+            this._syncCropEntity(r, c, cell);
         });
     }
 
@@ -229,42 +291,54 @@ export class GroundGridCtrl extends BaseMVCSubCtrl {
     }
 
 
+    /**
+         * 🌟 作物实体的生成与回收逻辑 (全权交由 PoolManager 托管)
+         */
+    private _syncCropEntity(row: number, col: number, cell: ICellData): void {
+        const key = `${row}_${col}`;
+        const hasCrop = (cell.state === ECellState.Planted || cell.state === ECellState.Harvestable || cell.state === ECellState.Withered);
 
+        if (hasCrop) {
+            let cropNode = this._activeCrops.get(key);
+            if (!cropNode) {
+                // 🌟 净化 1：直接向全局对象池索要！(内部自带实例化兜底)
+                cropNode = PoolManager.instance.getNode(this._view.cropPrefab, this._view.entityContainer);
 
+                // 设置绝对坐标
+                cropNode.setPosition(this.isoToScreen(row, col));
+                this._activeCrops.set(key, cropNode);
 
-    private _onCellStateChanged(payload: { row: number, col: number, newState: ECellState }): void {
-        const { row, col, newState } = payload;
-        const key = `${row},${col}`;
+                // 因为加入了新节点，实体层进行一次 Y-Sort 排序
+                this._sortEntityContainer();
+            }
+            // 刷新贴图
+            cropNode.getComponent(CropEntity)?.refresh(cell);
 
-        const cellData = this._model.getCellData(row, col);
-        if (cellData) {
-            cellData.state = newState;
-        }
-        // ✅ 修复点 4：从活跃节点 Map 中获取对应的节点进行刷新
-        const node = this._activeNodes.get(key);
-        if (node) {
-            const cellCtrl = node.getComponent(GroundGridCell);
-            if (cellCtrl) {
-                cellCtrl.refresh(cellData);
+        } else {
+            // 如果地块没有作物，但字典里有，说明被收割了，立刻回收！
+            let cropNode = this._activeCrops.get(key);
+            if (cropNode) {
+                // 🌟 净化 2：调用你的全局回收方法 (请根据你 PoolManager 的实际方法名调整，通常是 putNode 或 releaseNode)
+                PoolManager.instance.putNode(cropNode);
+                this._activeCrops.delete(key);
             }
         }
     }
 
-    private _onCameraZoomChanged(payload: { zoomRatio: number }): void {
-        this._currentZoomRatio = payload.zoomRatio;
-        this._caculateVisibleRowCol();
+    /**
+     * 🌟 对实体层进行纯粹的静态排序
+     */
+    private _sortEntityContainer(): void {
+        if (!this._view.entityContainer) return;
+        const entities = this._view.entityContainer.children.slice();
+        entities.sort((a, b) => b.position.y - a.position.y);
+
+        entities.forEach((child, index) => {
+            if (child.name === 'Player') return; // 主角自己会动态插值
+            if (child.getSiblingIndex() !== index) {
+                child.setSiblingIndex(index);
+            }
+        });
     }
 
-    private _onScreenSizeChanged() {
-        this._caculateVisibleRowCol();
-    }
-
-    private _onTargetChanged(payload: { row: number, col: number }): void {
-        if (!this._view.cursorNode) return;
-
-        this._view.cursorNode.active = true;
-        // 使用同样的神圣坐标转换，光标绝对能完美扣在那个格子上！
-        this._view.cursorNode.setPosition(this.isoToScreen(payload.row, payload.col));
-
-    }
 }

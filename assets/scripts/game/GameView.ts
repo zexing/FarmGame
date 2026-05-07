@@ -30,8 +30,9 @@ export class GameView extends BaseMVCView<GameModel, GameController> {
 
         // 🌟 核心破局点：将玩家节点变为网格容器的子节点！
         // 这确立了主角和农作物可以互相遮挡的物理前提。
-        this.playerView.node.setParent(this.mapView.gridContainer);
-        
+        // 🌟 修正：主角不再放入 gridContainer，而是放入专用的 entityContainer！
+        this.playerView.node.setParent(this.mapView.entityContainer);
+
         this.controller.initGameWorld();
     }
 

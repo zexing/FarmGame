@@ -4,6 +4,7 @@ import { EventManager } from '../../common/manager/EventManager';
 import { ECellState, MapConst } from '../../const/GameDefine';
 import { SystemEvent, TimeEvent } from '../../events';
 import { BaseMVCController } from '../../mvc/BaseMVCController';
+import { CropEntityCtrl } from './crop_entity/CropEntityCtrl';
 import { GroundGridCtrl } from './ground_grid/GroundGridCtrl';
 import { ICellData, IMapController } from './IMap';
 import { MapModel } from './MapModel';
@@ -15,6 +16,7 @@ export class MapController extends BaseMVCController<MapModel, MapView>
 
     private _groundGridCtrl: GroundGridCtrl;
     private _mapChunkCtrl: MapChunkCtrl;
+    private _cropEntityCtrl: CropEntityCtrl;
 
     protected onInit(): void {
         console.log("MapController onInit!!!!");
@@ -30,6 +32,7 @@ export class MapController extends BaseMVCController<MapModel, MapView>
 
         this._groundGridCtrl = this.registerSubCtrl(new GroundGridCtrl());
         this._mapChunkCtrl = this.registerSubCtrl(new MapChunkCtrl());
+        this._cropEntityCtrl = this.registerSubCtrl(new CropEntityCtrl());
 
         // 🌟 3. 算出整个大世界的边界并下发给摄像机！
         this._broadcastWorldBounds();
@@ -160,13 +163,13 @@ export class MapController extends BaseMVCController<MapModel, MapView>
         return MapConst.WORLD_CHUNKS_COL * MapConst.CHUNK_SIZE;
     }
 
-    public isoToScreen(row: number, col: number): Vec3 {
-        return this._groundGridCtrl.isoToScreen(row, col);;
-    }
+    // public isoToScreen(row: number, col: number): Vec3 {
+    //     return this._groundGridCtrl.isoToScreen(row, col);;
+    // }
 
-    public screenToIso(x: number, y: number): { row: number, col: number } {
-        return this._groundGridCtrl.screenToIso(x, y);
-    }
+    // public screenToIso(x: number, y: number): { row: number, col: number } {
+    //     return this._groundGridCtrl.screenToIso(x, y);
+    // }
 
     public async initViewPort(): Promise<void> {
         const startRow = Math.round(this.getRows() / 2);

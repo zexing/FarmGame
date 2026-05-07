@@ -1,4 +1,4 @@
-import { Node, Prefab, Vec3 } from "cc";
+import { Node, Prefab } from "cc";
 import { ECellState } from "../../const/GameDefine";
 
 // 作物数据接口
@@ -74,12 +74,16 @@ export interface IMapView {
 
     groundCellPrefab: Prefab;
 
+    cropPrefab: Prefab; // 🌟 新增：独立的作物预制体
+
     gridContainer: Node;
 
     cursorNode: Node;
 
-    refreshCell(row: number, col: number, cell: ICellData): void;
-    refreshAllCells(): void;
+    entityContainer: Node; // 🌟 新增：实体层容器
+
+    // refreshCell(row: number, col: number, cell: ICellData): void;
+    // refreshAllCells(): void;
 
 }
 
@@ -92,11 +96,11 @@ export interface IMapController {
     // 获取地图地块总列数
     getCols(): number;
 
-    /** 格子坐标转屏幕坐标 */
-    isoToScreen(row: number, col: number): Vec3;
+    // /** 格子坐标转屏幕坐标 */
+    // isoToScreen(row: number, col: number): Vec3;
 
-    /** 屏幕坐标转格子坐标 */
-    screenToIso(x: number, y: number): { row: number, col: number };
+    // /** 屏幕坐标转格子坐标 */
+    // screenToIso(x: number, y: number): { row: number, col: number };
 
     /** 获取指定格子坐标的地块数据 */
     getCellData(row: number, col: number): ICellData | null;
