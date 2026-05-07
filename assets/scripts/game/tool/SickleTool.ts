@@ -2,7 +2,7 @@ import { ConfigManager } from '../../common/manager/ConfigManager'; // ✅ 引�
 import { EventManager } from '../../common/manager/EventManager';
 import { ICropConfig } from '../../config/CropConfig';
 import { FarmEvent } from '../../events/FarmEvents';
-import { SystemEvent } from '../../events/SystemEvents';
+import { SystemEvents } from '../../events/SystemEvents';
 import { InventoryManager } from '../inventory/InventoryManager'; // ✅ 引入背包大管家
 import { ICellData } from '../map/IMap';
 import { ITool, IToolContext } from './ITool';
@@ -30,7 +30,7 @@ export class SickleTool implements ITool {
     public use(row: number, col: number, cell: ICellData | null, ctx: IToolContext): boolean {
         if (!this.canUse(cell) || !cell) {
             // 失败飘字：植物还没熟，或者根本没植物
-            EventManager.getInstance().dispatchEvent(SystemEvent.GameTip, { msg: `作物还没有成熟，无法收割！` });
+            EventManager.getInstance().dispatchEvent(SystemEvents.GameTip, { msg: `作物还没有成熟，无法收割！` });
             return false;
         }
 
@@ -45,7 +45,7 @@ export class SickleTool implements ITool {
         
         if (addedCount <= 0) {
             // 如果加不进去（比如达到 MAX_STACK 上限了）
-            EventManager.getInstance().dispatchEvent(SystemEvent.GameTip, { msg: `背包已满，无法收割更多的 ${cropInfo.name}！` });
+            EventManager.getInstance().dispatchEvent(SystemEvents.GameTip, { msg: `背包已满，无法收割更多的 ${cropInfo.name}！` });
             return false; 
         }
 
@@ -71,7 +71,7 @@ export class SickleTool implements ITool {
         EventManager.getInstance().dispatchEvent(FarmEvent.CellStateChanged, { row, col, newState: cell.state });
 
         // ✅ 成功飘字，带上动态配置表里的中文名字
-        EventManager.getInstance().dispatchEvent(SystemEvent.GameTip, { msg: `成功收割了 1 个 [${cropInfo.name}]` });
+        EventManager.getInstance().dispatchEvent(SystemEvents.GameTip, { msg: `成功收割了 1 个 [${cropInfo.name}]` });
         return true;
     }
 }

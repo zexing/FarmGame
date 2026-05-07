@@ -1,7 +1,7 @@
 import { EventManager } from '../../common/manager/EventManager';
 import { ECellState } from '../../const/GameDefine';
 import { FarmEvent } from '../../events/FarmEvents';
-import { SystemEvent } from '../../events/SystemEvents';
+import { SystemEvents } from '../../events/SystemEvents';
 import { ICellData } from '../map/IMap';
 import { ITool, IToolContext } from './ITool';
 
@@ -19,7 +19,7 @@ export class ClearTool implements ITool {
     public use(row: number, col: number, cell: ICellData | null, ctx: IToolContext): boolean {
         if (!this.canUse(cell) || !cell) {
             // 失败飘字
-            EventManager.getInstance().dispatchEvent(SystemEvent.GameTip, { msg: `这里无法使用${this.name}！` });
+            EventManager.getInstance().dispatchEvent(SystemEvents.GameTip, { msg: `这里无法使用${this.name}！` });
             return false;
         }
 
@@ -30,7 +30,7 @@ export class ClearTool implements ITool {
         EventManager.getInstance().dispatchEvent(FarmEvent.CellStateChanged, { row, col, newState: cell.state });
 
         // ✅ 成功飘字
-        EventManager.getInstance().dispatchEvent(SystemEvent.GameTip, { msg: `成功将 (${row}, ${col}) 的耕地砸平复原了！` });
+        EventManager.getInstance().dispatchEvent(SystemEvents.GameTip, { msg: `成功将 (${row}, ${col}) 的耕地砸平复原了！` });
         return true;
     }
 }

@@ -384,8 +384,8 @@
       "z": 1000
     },
     "minZoom": 500,
-    "maxZoom": 5000,
-    "zoomStep": 100,
+    "maxZoom": 2000,
+    "zoomStep": 20,
     "zoomSmoothSpeed": 10,
     "enableBounds": false,
     "_id": "af0a38cspBwYR8h/jhBF3i"

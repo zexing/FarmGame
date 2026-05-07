@@ -24,7 +24,7 @@ export {
 // ── 系统 & 网络事件（SystemEvents.ts）────────────────────────────────────────
 export {
     NetworkEvent,
-    SystemEvent
+    SystemEvents as SystemEvent
 } from './SystemEvents';
 
 

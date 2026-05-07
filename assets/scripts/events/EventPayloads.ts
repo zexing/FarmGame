@@ -38,7 +38,7 @@ import {
     TimeEvent,
 } from './FarmEvents';
 import { PlayerEvent } from './PlayerEvents';
-import { NetworkEvent, SystemEvent } from './SystemEvents';
+import { NetworkEvent, SystemEvents } from './SystemEvents';
 
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -92,12 +92,12 @@ export interface EventPayloadMap {
     // 系统事件
     // =========================================================================
 
-    [SystemEvent.Update]:       number;
-    [SystemEvent.LaterUpdate]:  void;
-    [SystemEvent.ShakeCamera]:  IShakeCameraParam;
-    [SystemEvent.GameTip]:      string;
-    [SystemEvent.ClickSpace]:   void;
-    [SystemEvent.ExitGame]:     void;
+    [SystemEvents.Update]:       number;
+    [SystemEvents.LaterUpdate]:  void;
+    [SystemEvents.ShakeCamera]:  IShakeCameraParam;
+    [SystemEvents.GameTip]:      string;
+    [SystemEvents.ClickSpace]:   void;
+    [SystemEvents.ExitGame]:     void;
 
     // =========================================================================
     // 网络事件

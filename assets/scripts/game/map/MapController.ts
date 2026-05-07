@@ -1,5 +1,5 @@
 // assets/scripts/game/farm/FarmController.ts
-import { Rect, Vec3 } from 'cc';
+import { Rect } from 'cc';
 import { EventManager } from '../../common/manager/EventManager';
 import { ECellState, MapConst } from '../../const/GameDefine';
 import { SystemEvent, TimeEvent } from '../../events';

@@ -22,6 +22,7 @@ export class GroundGridCtrl extends BaseMVCSubCtrl {
     private _viewCenterRow: number = -1;
     private _viewCenterCol: number = -1;
     private _currentZoomRatio: number = 1.0;
+    private _lastZoomRatio: number = 1.0;
 
 
     public init(model: IMapModel, view: IMapView): void {
@@ -79,11 +80,13 @@ export class GroundGridCtrl extends BaseMVCSubCtrl {
 
     private _onCameraZoomChanged(payload: { zoomRatio: number }): void {
         this._currentZoomRatio = payload.zoomRatio;
-        this._caculateVisibleRowCol();
+        // this._caculateVisibleRowCol();
+        this.updateViewport(this._viewCenterRow, this._viewCenterCol);
     }
 
     private _onScreenSizeChanged() {
-        this._caculateVisibleRowCol();
+        // this._caculateVisibleRowCol();
+        this.updateViewport(this._viewCenterRow, this._viewCenterCol);
     }
 
     private _onTargetChanged(payload: { row: number, col: number }): void {
@@ -142,69 +145,46 @@ export class GroundGridCtrl extends BaseMVCSubCtrl {
         }
     }
 
-    public updateViewport(centerRow: number, centerCol: number): void {
 
-        // 如果中心点没变，直接跳过，节省性能
-        if (this._viewCenterRow === centerRow && this._viewCenterCol === centerCol) return;
+
+    /**
+     * 🌟 纯逻辑驱动的视口更新
+     * @param centerRow 玩家/相机当前所在的逻辑行
+     * @param centerCol 玩家/相机当前所在的逻辑列
+     * @param zoomScale 当前的缩放比例
+     */
+    public updateViewport(centerRow: number, centerCol: number): void {
+        // 性能判定：如果中心逻辑点没变，且缩放没变，则完全不需要刷新！
+        if (this._viewCenterRow === centerRow &&
+            this._viewCenterCol === centerCol &&
+            this._lastZoomRatio === this._currentZoomRatio) {
+            return;
+        }
+
         this._viewCenterRow = centerRow;
         this._viewCenterCol = centerCol;
-        this._caculateVisibleRowCol();
-    }
+        this._lastZoomRatio = this._currentZoomRatio;
 
-    private _caculateVisibleRowCol(): void {
-
-        const view_size = new Size(window.visualViewport.width, window.visualViewport.height);
-        // console.log("view_size: ", view_size);
-
-        view_size.width *= this._currentZoomRatio;
-        view_size.height *= this._currentZoomRatio;
-
-        const view_port_rows = Math.ceil(view_size.width / MapConst.CELL_WIDTH) + MapConst.EXTRA_VIEWPORT_ROW;
-        const view_port_cols = Math.ceil(view_size.height / MapConst.CELL_HEIGHT) + MapConst.EXTRA_VIEWPORT_COL;
-
-        const halfR = Math.round(view_port_rows / 2);
-        const halfC = Math.round(view_port_cols / 2);
-
-        const minRow = Math.max(0, this._viewCenterRow - halfR);
-        const maxRow = Math.min(this._model.rows - 1, this._viewCenterRow + halfR);
-        const minCol = Math.max(0, this._viewCenterCol - halfC);
-        const maxCol = Math.min(this._model.cols - 1, this._viewCenterCol + halfC);
-
-        this._updateVisableCells(minRow, maxRow, minCol, maxCol);
-    }
-
-    private _updateVisableCells(minRow: number, maxRow: number, minCol: number, maxCol: number) {
-        console.log(`_updateVisableCells: ${minRow}   ${maxRow}  ${minCol}  ${maxCol}`);
-        const targetKeys = new Set<string>();
-        for (let r = minRow; r <= maxRow; r++) {
-            for (let c = minCol; c <= maxCol; c++) {
-                targetKeys.add(`${r},${c}`);
-            }
-        }
-
-        // 1. 回收超出视口的节点
-        const toRecycle: string[] = [];
-        for (const key of this._activeNodes.keys()) {
-            if (!targetKeys.has(key)) toRecycle.push(key);
-        }
-
-        for (const key of toRecycle) {
-            const node = this._activeNodes.get(key);
-            if (node && node.isValid) {
-                PoolManager.getInstance().putNode(node);
-            }
-            this._activeNodes.delete(key);
-        }
+        // 🌟 1. 根据中心点获取当前可见的网格集合
+        const newVisibleKeys = this._getVisibleKeysByRadius(centerRow, centerCol);
 
         let isNewNodeAdded = false;
 
-        // 2. 创建/取出新进入视口的节点
-        for (let r = minRow; r <= maxRow; r++) {
-            for (let c = minCol; c <= maxCol; c++) {
-                const key = `${r},${c}`;
-                if (this._activeNodes.has(key)) continue;
+        // 2. 移除旧格子
+        for (const [key, node] of this._activeNodes.entries()) {
+            if (!newVisibleKeys.has(key)) {
+                PoolManager.getInstance().putNode(node);
+                this._activeNodes.delete(key);
+            }
+        }
 
-                // 从对象池取节点并放入场景
+        // 3. 新增新格子
+        for (const key of newVisibleKeys) {
+            if (!this._activeNodes.has(key)) {
+                const [rowStr, colStr] = key.split('_');
+                const r = parseInt(rowStr);
+                const c = parseInt(colStr);
+
                 const node = PoolManager.getInstance().getNode(this._view.groundCellPrefab, this._view.gridContainer);
                 node.name = `Cell_${r}_${c}`;
                 node.setPosition(IsoUtils.isoToScreen(r, c));
@@ -212,20 +192,146 @@ export class GroundGridCtrl extends BaseMVCSubCtrl {
 
                 isNewNodeAdded = true;
 
-                // 获取业务数据并刷新视觉组件
                 const cellData = this._model?.getCellData(r, c) ?? createDefaultCellData(r, c);
                 const cellComp = node.getComponent(GroundGridCell);
-                if (cellComp) {
-                    cellComp.refresh(cellData);
-                }
+                if (cellComp) cellComp.refresh(cellData);
             }
         }
 
-        // ✅ 修复点 3：抛弃绝对索引计算，一旦有新节点加入，执行一次基于 Y 轴深度的排序！
         if (isNewNodeAdded) {
             this._sortVisibleCellsLayer();
         }
     }
+
+    /**
+     * 🌟 核心算法：基于逻辑中心的动态半径扩散 + 隐藏的矩形裁剪
+     */
+    private _getVisibleKeysByRadius(centerRow: number, centerCol: number): Set<string> {
+        const newVisibleKeys = new Set<string>();
+        const viewSize = new Size(window.visualViewport.width, window.visualViewport.height);
+
+        // 🌟 关键数学推导：计算屏幕对角线到底需要几个格子！
+        // 逻辑世界中，宽和高都会随着缩放变大，把增加的物理尺寸除以单个格子的物理尺寸，得出扩散半径
+        const screenGridW = Math.ceil(viewSize.width * this._currentZoomRatio / MapConst.CELL_WIDTH) + MapConst.EXTRA_VIEWPORT_ROW;
+        const screenGridH = Math.ceil(viewSize.height * this._currentZoomRatio / MapConst.CELL_HEIGHT) + MapConst.EXTRA_VIEWPORT_COL;
+
+        // // 动态半径 = 宽向格子数 + 高向格子数 + 2个单位的防穿帮 Padding
+        // const radius = Math.ceil(screenGridW + screenGridH);
+
+        // 框出逻辑遍历范围
+        let minR = Math.max(0, centerRow - screenGridW);
+        let maxR = Math.min(this._model.rows - 1, centerRow + screenGridW);
+        let minC = Math.max(0, centerCol - screenGridH);
+        let maxC = Math.min(this._model.cols - 1, centerCol + screenGridH);
+
+        // // 🚀 秘密保留的性能护城河：虽然外层不传物理坐标，但在内部我们自己逆推算出物理中心！
+        // // 用它来做一次屏幕矩形 AABB 裁剪，砍掉多余的菱形尖角！
+        // const centerWorldPos = IsoUtils.isoToScreen(centerRow, centerCol);
+        // const halfW = (viewSize.width * this._currentZoomRatio) / 2 + MapConst.CELL_WIDTH * 1.5;
+        // const halfH = (viewSize.height * this._currentZoomRatio) / 2 + MapConst.CELL_HEIGHT * 1.5;
+
+        for (let r = minR; r <= maxR; r++) {
+            for (let c = minC; c <= maxC; c++) {
+
+                // // 剔除超出物理屏幕的菱形尖角（强力省 DrawCall！）
+                // const pos = IsoUtils.isoToScreen(r, c);
+                // if (Math.abs(pos.x - centerWorldPos.x) > halfW ||
+                //     Math.abs(pos.y - centerWorldPos.y) > halfH) {
+                //     continue;
+                // }
+
+                newVisibleKeys.add(`${r}_${c}`);
+            }
+        }
+
+        return newVisibleKeys;
+    }
+
+
+    // public updateViewport(centerRow: number, centerCol: number): void {
+
+    //     // 如果中心点没变，直接跳过，节省性能
+    //     if (this._viewCenterRow === centerRow && this._viewCenterCol === centerCol) return;
+    //     this._viewCenterRow = centerRow;
+    //     this._viewCenterCol = centerCol;
+    //     this._caculateVisibleRowCol();
+    // }
+
+    // private _caculateVisibleRowCol(): void {
+
+    //     const view_size = new Size(window.visualViewport.width, window.visualViewport.height);
+    //     // console.log("view_size: ", view_size);
+
+    //     view_size.width *= this._currentZoomRatio;
+    //     view_size.height *= this._currentZoomRatio;
+
+    //     const view_port_rows = Math.ceil(view_size.width / MapConst.CELL_WIDTH) + MapConst.EXTRA_VIEWPORT_ROW;
+    //     const view_port_cols = Math.ceil(view_size.height / MapConst.CELL_HEIGHT) + MapConst.EXTRA_VIEWPORT_COL;
+
+    //     const halfR = Math.round(view_port_rows / 2);
+    //     const halfC = Math.round(view_port_cols / 2);
+
+    //     const minRow = Math.max(0, this._viewCenterRow - halfR);
+    //     const maxRow = Math.min(this._model.rows - 1, this._viewCenterRow + halfR);
+    //     const minCol = Math.max(0, this._viewCenterCol - halfC);
+    //     const maxCol = Math.min(this._model.cols - 1, this._viewCenterCol + halfC);
+
+    //     this._updateVisableCells(minRow, maxRow, minCol, maxCol);
+    // }
+
+    // private _updateVisableCells(minRow: number, maxRow: number, minCol: number, maxCol: number) {
+    //     console.log(`_updateVisableCells: ${minRow}   ${maxRow}  ${minCol}  ${maxCol}`);
+    //     const targetKeys = new Set<string>();
+    //     for (let r = minRow; r <= maxRow; r++) {
+    //         for (let c = minCol; c <= maxCol; c++) {
+    //             targetKeys.add(`${r},${c}`);
+    //         }
+    //     }
+
+    //     // 1. 回收超出视口的节点
+    //     const toRecycle: string[] = [];
+    //     for (const key of this._activeNodes.keys()) {
+    //         if (!targetKeys.has(key)) toRecycle.push(key);
+    //     }
+
+    //     for (const key of toRecycle) {
+    //         const node = this._activeNodes.get(key);
+    //         if (node && node.isValid) {
+    //             PoolManager.getInstance().putNode(node);
+    //         }
+    //         this._activeNodes.delete(key);
+    //     }
+
+    //     let isNewNodeAdded = false;
+
+    //     // 2. 创建/取出新进入视口的节点
+    //     for (let r = minRow; r <= maxRow; r++) {
+    //         for (let c = minCol; c <= maxCol; c++) {
+    //             const key = `${r},${c}`;
+    //             if (this._activeNodes.has(key)) continue;
+
+    //             // 从对象池取节点并放入场景
+    //             const node = PoolManager.getInstance().getNode(this._view.groundCellPrefab, this._view.gridContainer);
+    //             node.name = `Cell_${r}_${c}`;
+    //             node.setPosition(IsoUtils.isoToScreen(r, c));
+    //             this._activeNodes.set(key, node);
+
+    //             isNewNodeAdded = true;
+
+    //             // 获取业务数据并刷新视觉组件
+    //             const cellData = this._model?.getCellData(r, c) ?? createDefaultCellData(r, c);
+    //             const cellComp = node.getComponent(GroundGridCell);
+    //             if (cellComp) {
+    //                 cellComp.refresh(cellData);
+    //             }
+    //         }
+    //     }
+
+    //     // ✅ 修复点 3：抛弃绝对索引计算，一旦有新节点加入，执行一次基于 Y 轴深度的排序！
+    //     if (isNewNodeAdded) {
+    //         this._sortVisibleCellsLayer();
+    //     }
+    // }
 
     /**
      * 🌟 终极排序方案：Y-Sorting (解决动态加载时的遮挡问题)

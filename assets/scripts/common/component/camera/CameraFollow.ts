@@ -1,5 +1,5 @@
 import { _decorator, Camera, Component, EventMouse, input, Input, math, Node, Rect, Vec3, view } from 'cc';
-import { SystemEvent } from '../../../events/SystemEvents';
+import { SystemEvents } from '../../../events/SystemEvents';
 import { EventManager } from '../../manager/EventManager';
 const { ccclass, property } = _decorator;
 
@@ -53,7 +53,7 @@ export class CameraFollow extends Component {
         }
         input.on(Input.EventType.MOUSE_WHEEL, this._onMouseWheel, this);
         // 👂 监听地图边界变更
-        EventManager.getInstance().on(SystemEvent.MapBoundsChanged, this._onMapBoundsChanged, this);
+        EventManager.getInstance().on(SystemEvents.MapBoundsChanged, this._onMapBoundsChanged, this);
     }
 
     // protected start() {
@@ -73,7 +73,7 @@ export class CameraFollow extends Component {
 
     protected onDestroy() {
         input.off(Input.EventType.MOUSE_WHEEL, this._onMouseWheel, this);
-        EventManager.getInstance().off(SystemEvent.MapBoundsChanged, this._onMapBoundsChanged, this);
+        EventManager.getInstance().off(SystemEvents.MapBoundsChanged, this._onMapBoundsChanged, this);
     }
 
     /**
@@ -116,7 +116,7 @@ export class CameraFollow extends Component {
                 this._camera.orthoHeight = new_orthoHeight;
                 const currentZoomRatio = this._camera.orthoHeight / this._baseOrthoHeight;
                 // 通知网格系统：视窗缩放比例变了！
-                EventManager.getInstance().dispatchEvent(SystemEvent.CameraZoomChanged, {
+                EventManager.getInstance().dispatchEvent(SystemEvents.CameraZoomChanged, {
                     zoomRatio: currentZoomRatio
                 });
             }

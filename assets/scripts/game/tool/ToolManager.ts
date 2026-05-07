@@ -1,7 +1,7 @@
 import { SingletonManager } from '../../common/base/SingletonManager';
 import { EventManager } from '../../common/manager/EventManager';
 import { InputEvent } from '../../events/InputEvents';
-import { SystemEvent } from '../../events/SystemEvents';
+import { SystemEvents } from '../../events/SystemEvents';
 import { ClearTool } from './ClearTool';
 import { HoeTool } from './HoeTool';
 import { ITool } from './ITool';
@@ -51,7 +51,7 @@ export class ToolManager extends SingletonManager {
             console.log(`🧰 [ToolManager] 丝滑切枪！当前装备快捷栏 ${slotIndex}: 【${tool?.name}】`);
 
             // ✅ 核心新增：通知全服，玩家换工具了！
-            EventManager.getInstance().dispatchEvent(SystemEvent.ToolChanged, { slotIndex: slotIndex });
+            EventManager.getInstance().dispatchEvent(SystemEvents.ToolChanged, { slotIndex: slotIndex });
         } else {
             console.log(`🧰 [ToolManager] 快捷栏 ${slotIndex} 是空的，没东西可拿！`);
         }

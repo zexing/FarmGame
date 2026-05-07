@@ -7,7 +7,7 @@ import { ServiceLocator } from "../common/manager/ServiceLocator";
 import { UIManager } from "../common/manager/UIManager";
 import { UIID } from "../common/ui/base/UIConfig";
 import { ServiceKey } from "../const/ServiceDefine";
-import { SystemEvent } from "../events/SystemEvents";
+import { SystemEvents } from "../events/SystemEvents";
 import { BaseMVCController } from "../mvc/BaseMVCController";
 import { GameModel } from "./GameModel";
 import { GameView } from "./GameView";
@@ -23,14 +23,14 @@ export class GameController extends BaseMVCController<GameModel, GameView> {
         console.log("GameController onInit!!!!");
         InventoryManager.instance.add("101", 5);
         // 👂 监听底层的飘字需求
-        EventManager.getInstance().on(SystemEvent.GameTip, this._onGameTip, this);
+        EventManager.getInstance().on(SystemEvents.GameTip, this._onGameTip, this);
     }
 
     /**
      * 游戏销毁时的清理逻辑
      */
     protected onDestroy(): void {
-        EventManager.getInstance().off(SystemEvent.GameTip, this._onGameTip, this);
+        EventManager.getInstance().off(SystemEvents.GameTip, this._onGameTip, this);
         // 使用你源码中定义的专属大招，一键清空所有监听！
         SingletonManager.destroyAllInstances();
         super.onDestroy();

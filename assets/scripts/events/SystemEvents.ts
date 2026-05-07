@@ -3,7 +3,7 @@
  */
 
 /** ========== 系统事件 ========== */
-export enum SystemEvent {
+export enum SystemEvents {
     /** 更新背景音量 */
     UpdateBgmVolume = "updateVolume",
     /** 更新音效音量 */
