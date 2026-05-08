@@ -3,7 +3,8 @@ import { PoolManager } from 'db://assets/scripts/common/manager/PoolManager';
 import { ECellState, MapConst } from 'db://assets/scripts/const/GameDefine';
 import { createDefaultCellData, ICellData, IMapModel, IMapView } from 'db://assets/scripts/game/map/IMap';
 import { EventManager } from '../../../common/manager/EventManager';
-import { FarmEvent, PlayerEvent, SystemEvent, TimeEvent } from '../../../events';
+import { FarmEvents, SystemEvents, TimeEvents } from '../../../events';
+import { PlayerEvents } from '../../../events/PlayerEvents';
 import { BaseMVCSubCtrl } from '../../../mvc/BaseMVCSubCtrl';
 import { IsoUtils } from '../IsoUtils';
 import { GroundGridCell } from './GroundGridCell';
@@ -29,24 +30,24 @@ export class GroundGridCtrl extends BaseMVCSubCtrl {
     public init(model: IMapModel, view: IMapView): void {
         super.init(model, view);
         this.initGridNodes();
-        EventManager.getInstance().on(FarmEvent.CellStateChanged, this._onCellStateChanged, this);
-        EventManager.getInstance().on(SystemEvent.CameraZoomChanged, this._onCameraZoomChanged, this);
-        EventManager.getInstance().on(SystemEvent.ScreenSizeChanged, this._onScreenSizeChanged, this);
+        EventManager.getInstance().on(FarmEvents.CellStateChanged, this._onCellStateChanged, this);
+        EventManager.getInstance().on(SystemEvents.CameraZoomChanged, this._onCameraZoomChanged, this);
+        EventManager.getInstance().on(SystemEvents.ScreenSizeChanged, this._onScreenSizeChanged, this);
         // 🌟 规范修改：使用枚举监听
-        EventManager.getInstance().on(PlayerEvent.TargetChanged, this._onTargetChanged, this);
+        EventManager.getInstance().on(PlayerEvents.TargetChanged, this._onTargetChanged, this);
 
         // 🌟 解除封印 3A：新的一天开始时，强制刷新视野内所有格子（变干涸、变大）
-        EventManager.getInstance().on(TimeEvent.DayBegin, this.refreshAll, this);
+        EventManager.getInstance().on(TimeEvents.DayBegin, this.refreshAll, this);
     }
 
     public destroy(): void {
-        EventManager.getInstance().off(FarmEvent.CellStateChanged, this._onCellStateChanged, this);
-        EventManager.getInstance().off(SystemEvent.CameraZoomChanged, this._onCameraZoomChanged, this);
-        EventManager.getInstance().off(SystemEvent.ScreenSizeChanged, this._onScreenSizeChanged, this);
+        EventManager.getInstance().off(FarmEvents.CellStateChanged, this._onCellStateChanged, this);
+        EventManager.getInstance().off(SystemEvents.CameraZoomChanged, this._onCameraZoomChanged, this);
+        EventManager.getInstance().off(SystemEvents.ScreenSizeChanged, this._onScreenSizeChanged, this);
         // 🌟 规范修改：使用枚举监听
-        EventManager.getInstance().off(PlayerEvent.TargetChanged, this._onTargetChanged, this);
+        EventManager.getInstance().off(PlayerEvents.TargetChanged, this._onTargetChanged, this);
 
-        EventManager.getInstance().off(TimeEvent.DayBegin, this.refreshAll, this);
+        EventManager.getInstance().off(TimeEvents.DayBegin, this.refreshAll, this);
 
 
         this._activeNodes.clear();

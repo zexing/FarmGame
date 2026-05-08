@@ -6,7 +6,7 @@
  * 玩家数据变化事件
  * 用于驱动 HUD 显示更新，任何修改玩家数据的地方派发对应事件
  */
-export enum PlayerEvent {
+export enum PlayerEvents {
     /** 金币数量变化（增加或减少） */
     GoldChanged        = 'player.goldChanged',
     /** 特殊材料数量变化 */

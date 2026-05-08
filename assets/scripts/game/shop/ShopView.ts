@@ -13,7 +13,7 @@
 //  * 不负责：
 //  * - 具体格子的渲染（CommonList + ShopItemCell 负责）
 //  * - 节点回收与对象池（CommonList 内部使用 PoolManager 处理）
-//  * - 金币 UI 更新（GoldPanel 自动监听 PlayerEvent.GoldChanged）
+//  * - 金币 UI 更新（GoldPanel 自动监听 PlayerEvents.GoldChanged）
 //  * - 实际买卖逻辑（ShopController）
 //  *
 //  * 打开方式（从任意脚本调用）：

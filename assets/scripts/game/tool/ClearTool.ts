@@ -1,6 +1,6 @@
 import { EventManager } from '../../common/manager/EventManager';
 import { ECellState } from '../../const/GameDefine';
-import { FarmEvent } from '../../events/FarmEvents';
+import { FarmEvents } from '../../events/FarmEvents';
 import { SystemEvents } from '../../events/SystemEvents';
 import { ICellData } from '../map/IMap';
 import { ITool, IToolContext } from './ITool';
@@ -27,7 +27,7 @@ export class ClearTool implements ITool {
         cell.state = ECellState.Untilled;
         cell.isWatered = false;
 
-        EventManager.getInstance().dispatchEvent(FarmEvent.CellStateChanged, { row, col, newState: cell.state });
+        EventManager.getInstance().dispatchEvent(FarmEvents.CellStateChanged, { row, col, newState: cell.state });
 
         // ✅ 成功飘字
         EventManager.getInstance().dispatchEvent(SystemEvents.GameTip, { msg: `成功将 (${row}, ${col}) 的耕地砸平复原了！` });

@@ -31,13 +31,13 @@ import { Season, Weather } from '../const/GameDefine';
 import {
     BuildingEvent,
     ExploreEvent,
-    FarmEvent,
-    FarmUIEvent,
+    FarmEvents,
+    FarmUIEvents,
     LivestockEvent,
-    NpcEvent,
-    TimeEvent,
+    NpcEvents,
+    TimeEvents,
 } from './FarmEvents';
-import { PlayerEvent } from './PlayerEvents';
+import { PlayerEvents } from './PlayerEvents';
 import { NetworkEvent, SystemEvents } from './SystemEvents';
 
 
@@ -112,94 +112,94 @@ export interface EventPayloadMap {
     // =========================================================================
 
     /** 格子被开垦 */
-    [FarmEvent.CellTilled]: ICellPos;
+    [FarmEvents.CellTilled]: ICellPos;
 
     /** 作物种下：格子坐标 + 作物ID + 种子来源 */
-    [FarmEvent.CropPlanted]: ICellPos & { cropId: string };
+    [FarmEvents.CropPlanted]: ICellPos & { cropId: string };
 
     /** 浇水完成：格子坐标 */
-    [FarmEvent.CropWatered]: ICellPos;
+    [FarmEvents.CropWatered]: ICellPos;
 
     /** 施肥完成：格子坐标 */
-    [FarmEvent.CropFertilized]: ICellPos;
+    [FarmEvents.CropFertilized]: ICellPos;
 
     /** 作物生长推进：格子坐标 + 新阶段 */
-    [FarmEvent.CropGrown]: ICellPos & { newStage: number };
+    [FarmEvents.CropGrown]: ICellPos & { newStage: number };
 
     /** 作物成熟可收获：格子坐标 + 作物ID */
-    [FarmEvent.CropHarvestable]: ICellPos & { cropId: string };
+    [FarmEvents.CropHarvestable]: ICellPos & { cropId: string };
 
     /** 收获完成：格子坐标 + 作物ID + 收获数量 + 是否还能继续收 */
-    [FarmEvent.CropHarvested]: ICellPos & {
+    [FarmEvents.CropHarvested]: ICellPos & {
         cropId:      string;
         count:       number;
         canHarvest:  boolean;  // false = 最后一次收获，格子将恢复 Tilled
     };
 
     /** 作物枯萎：格子坐标 + 原因 */
-    [FarmEvent.CropWithered]: ICellPos & {
+    [FarmEvents.CropWithered]: ICellPos & {
         cropId: string;
         reason: 'season' | 'weather' | 'expired';
     };
 
     /** 枯萎清除 */
-    [FarmEvent.WitheredCleared]: ICellPos;
+    [FarmEvents.WitheredCleared]: ICellPos;
 
     /** 格子被点击（请求弹出操作菜单） */
-    [FarmEvent.CellTapped]: ICellPos;
+    [FarmEvents.CellTapped]: ICellPos;
 
     /** 格子解锁 */
-    [FarmEvent.CellUnlocked]: ICellPos;
+    [FarmEvents.CellUnlocked]: ICellPos;
 
     // =========================================================================
     // 时间事件（TimeEvent）
     // =========================================================================
 
     /** 天结束 */
-    [TimeEvent.DayEnd]:   ITimeSnapshot;
+    [TimeEvents.DayEnd]:   ITimeSnapshot;
 
     /** 新的一天开始 */
-    [TimeEvent.DayBegin]: ITimeSnapshot;
+    [TimeEvents.DayBegin]: ITimeSnapshot;
 
     /** 季节切换：新旧季节 */
-    [TimeEvent.SeasonChanged]: { oldSeason: Season; newSeason: Season; year: number };
+    [TimeEvents.SeasonChanged]: { oldSeason: Season; newSeason: Season; year: number };
 
     /** 新年 */
-    [TimeEvent.YearChanged]: { year: number };
+    [TimeEvents.YearChanged]: { year: number };
 
     /** 天气变化：新天气 + 当前时间 */
-    [TimeEvent.WeatherChanged]: { weather: Weather } & ITimeSnapshot;
+    [TimeEvents.WeatherChanged]: { weather: Weather } & ITimeSnapshot;
 
     /** 行动点重置 */
-    [TimeEvent.ActionPointReset]: { max: number };
+    [TimeEvents.ActionPointReset]: { max: number };
 
     // =========================================================================
     // 玩家事件（PlayerEvent）
     // =========================================================================
 
     /** 金币变化 */
-    [PlayerEvent.GoldChanged]:        IResourceChangePayload;
+    [PlayerEvents.GoldChanged]:        IResourceChangePayload;
 
     /** 特殊材料变化：材料ID + 变化量 + 总量 */
-    [PlayerEvent.MaterialChanged]:    IResourceChangePayload & { materialId: string };
+    [PlayerEvents.MaterialChanged]:    IResourceChangePayload & { materialId: string };
 
     /** 经验变化 */
-    [PlayerEvent.ExpChanged]:         IResourceChangePayload;
+    [PlayerEvents.ExpChanged]:         IResourceChangePayload;
 
     /** 升级：新等级 */
-    [PlayerEvent.LevelUp]:            { newLevel: number; oldLevel: number };
+    [PlayerEvents.LevelUp]:            { newLevel: number; oldLevel: number };
 
     /** 物品加入背包 */
-    [PlayerEvent.ItemAdded]:          IItemPayload;
+    [PlayerEvents.ItemAdded]:          IItemPayload;
 
     /** 物品从背包移除 */
-    [PlayerEvent.ItemRemoved]:        IItemPayload;
+    [PlayerEvents.ItemRemoved]:        IItemPayload;
 
     /** 行动点变化 */
-    [PlayerEvent.ActionPointChanged]: IResourceChangePayload;
+    [PlayerEvents.ActionPointChanged]: IResourceChangePayload;
 
     /** 主角传送 */
-    [PlayerEvent.PlayerTeleported]:   ICellPos;
+    [PlayerEvents.PlayerTeleported]:   ICellPos;
 
     // =========================================================================
     // 建筑事件（BuildingEvent）
@@ -251,27 +251,27 @@ export interface EventPayloadMap {
     // NPC 事件（NpcEvent）
     // =========================================================================
 
-    [NpcEvent.Interacted]:    { npcId: string };
-    [NpcEvent.DialogueDone]:  { npcId: string };
-    [NpcEvent.QuestAccepted]: { npcId: string; questId: string };
-    [NpcEvent.QuestCompleted]:{ npcId: string; questId: string };
-    [NpcEvent.FavorityUp]:    { npcId: string; delta: number; total: number };
+    [NpcEvents.Interacted]:    { npcId: string };
+    [NpcEvents.DialogueDone]:  { npcId: string };
+    [NpcEvents.QuestAccepted]: { npcId: string; questId: string };
+    [NpcEvents.QuestCompleted]:{ npcId: string; questId: string };
+    [NpcEvents.FavorityUp]:    { npcId: string; delta: number; total: number };
 
     // =========================================================================
     // 种田 UI 事件（FarmUIEvent）
     // =========================================================================
 
-    [FarmUIEvent.ShowCellMenu]:   ICellPos;
-    [FarmUIEvent.HideCellMenu]:   void;
-    [FarmUIEvent.OpenInventory]:  void;
-    [FarmUIEvent.CloseInventory]: void;
-    [FarmUIEvent.OpenShop]:       void;
-    [FarmUIEvent.CloseShop]:      void;
-    [FarmUIEvent.OpenBuilding]:   void;
-    [FarmUIEvent.CloseBuilding]:  void;
-    [FarmUIEvent.HudRefresh]:     void;
-    [FarmUIEvent.ShowFloatText]:  IFloatTextPayload;
-    [FarmUIEvent.ShowToast]:      { text: string; duration?: number };
+    [FarmUIEvents.ShowCellMenu]:   ICellPos;
+    [FarmUIEvents.HideCellMenu]:   void;
+    [FarmUIEvents.OpenInventory]:  void;
+    [FarmUIEvents.CloseInventory]: void;
+    [FarmUIEvents.OpenShop]:       void;
+    [FarmUIEvents.CloseShop]:      void;
+    [FarmUIEvents.OpenBuilding]:   void;
+    [FarmUIEvents.CloseBuilding]:  void;
+    [FarmUIEvents.HudRefresh]:     void;
+    [FarmUIEvents.ShowFloatText]:  IFloatTextPayload;
+    [FarmUIEvents.ShowToast]:      { text: string; duration?: number };
 
 }
 

@@ -2,6 +2,7 @@
 import { _decorator, Vec3 } from 'cc';
 import { CameraFollow } from '../../common/component/camera/CameraFollow';
 import { BaseMVCView } from '../../mvc/BaseMVCView';
+import { RoleAnimation } from '../role/RoleAnimation';
 import { JoystickView } from './JoystickView';
 import { PlayerController } from './PlayerController';
 import { PlayerModel } from './PlayerModel';
@@ -39,6 +40,9 @@ export class PlayerView extends BaseMVCView<PlayerModel, PlayerController> {
 
     @property(CameraFollow)
     public cameraFollow: CameraFollow = null!;
+
+    @property(RoleAnimation)
+    public roleAnimation: RoleAnimation = null;
 
     // @property({ group: { name: "核心引用", id: "1" }, type: PlayerController, tooltip: "关联的主角控制器" })
     // public controller: PlayerController = null!;

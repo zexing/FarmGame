@@ -28,7 +28,7 @@
  * 农场格子操作事件
  * 由玩家主动操作触发（开垦 / 播种 / 浇水 / 施肥 / 收获）
  */
-export enum FarmEvent {
+export enum FarmEvents {
     /** 格子被开垦（空地 → 耕地） */
     CellTilled        = 'farm.cellTilled',
     /** 作物种下（耕地 → 已种植） */
@@ -65,7 +65,7 @@ export enum FarmEvent {
  * 游戏内时间流逝事件
  * 由 WorldTimeManager 在时间推进节点自动触发
  */
-export enum TimeEvent {
+export enum TimeEvents {
     /**
      * 当天结束（每游戏天推进时触发）
      * 触发顺序：作物生长 → 建筑加工 → 养殖产出 → 探索刷新 → 行动点重置 → 新天气
@@ -186,7 +186,7 @@ export enum ShopUIEvent {
 /**
  * NPC 交互与任务系统事件
  */
-export enum NpcEvent {
+export enum NpcEvents {
     /** 玩家与 NPC 交互（点击对话） */
     Interacted         = 'npc.interacted',
     /** 对话结束 */
@@ -208,7 +208,7 @@ export enum NpcEvent {
  * 种田游戏 UI 事件
  * 通用 UI 事件（UIManager 相关）继续使用 UIEvents.ts 中的定义
  */
-export enum FarmUIEvent {
+export enum FarmUIEvents {
     /** 显示格子操作菜单（开垦 / 播种 / 浇水 / 收获） */
     ShowCellMenu       = 'farmUI.showCellMenu',
     /** 关闭格子操作菜单 */

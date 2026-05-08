@@ -1,6 +1,6 @@
 import { SingletonManager } from '../../common/base/SingletonManager';
 import { EventManager } from '../../common/manager/EventManager';
-import { InputEvent } from '../../events/InputEvents';
+import { InputEvents } from '../../events/InputEvents';
 import { SystemEvents } from '../../events/SystemEvents';
 import { ClearTool } from './ClearTool';
 import { HoeTool } from './HoeTool';
@@ -26,7 +26,7 @@ export class ToolManager extends SingletonManager {
         this._tools.set(4, new SickleTool());      // 4 键：镰刀
         this._tools.set(5, new ClearTool());       // 5 键：十字镐
 
-        EventManager.getInstance().on(InputEvent.SLOT_SELECT, this._onSlotSelect, this);
+        EventManager.getInstance().on(InputEvents.SLOT_SELECT, this._onSlotSelect, this);
         console.log(`🎒 [ToolManager] 工具箱装配完毕！`);
     }
 
@@ -34,7 +34,7 @@ export class ToolManager extends SingletonManager {
      * 自动卸载生命周期
      */
     public onDestroy(): void {
-        EventManager.getInstance().off(InputEvent.SLOT_SELECT, this._onSlotSelect, this);
+        EventManager.getInstance().off(InputEvents.SLOT_SELECT, this._onSlotSelect, this);
     }
 
     /**

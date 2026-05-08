@@ -1,5 +1,5 @@
 import { EventKeyboard, input, Input, KeyCode } from 'cc';
-import { InputEvent } from '../../events/InputEvents';
+import { InputEvents } from '../../events/InputEvents';
 import { WorldTimeManager } from '../../game/world/WorldTimeManager';
 import { SingletonManager } from '../base/SingletonManager';
 import { UIID } from '../ui/base/UIConfig';
@@ -33,34 +33,34 @@ export class InputManager extends SingletonManager {
             // 1. 动作交互类
             case KeyCode.SPACE:
             case KeyCode.ENTER:
-                EventManager.getInstance().dispatchEvent(InputEvent.ACTION_USE_TOOL);
+                EventManager.getInstance().dispatchEvent(InputEvents.ACTION_USE_TOOL);
                 break;
 
             // 2. 快捷栏切换类 (数字键 1-4)
             case KeyCode.DIGIT_1:
             case KeyCode.NUM_1: // 👈 修改这里：Cocos 中的小键盘 1
-                EventManager.getInstance().dispatchEvent(InputEvent.SLOT_SELECT, { slotIndex: 1 });
+                EventManager.getInstance().dispatchEvent(InputEvents.SLOT_SELECT, { slotIndex: 1 });
                 break;
             case KeyCode.DIGIT_2:
             case KeyCode.NUM_2: // 👈 修改这里：Cocos 中的小键盘 2
-                EventManager.getInstance().dispatchEvent(InputEvent.SLOT_SELECT, { slotIndex: 2 });
+                EventManager.getInstance().dispatchEvent(InputEvents.SLOT_SELECT, { slotIndex: 2 });
                 break;
             case KeyCode.DIGIT_3:
             case KeyCode.NUM_3: // 👈 修改这里
-                EventManager.getInstance().dispatchEvent(InputEvent.SLOT_SELECT, { slotIndex: 3 });
+                EventManager.getInstance().dispatchEvent(InputEvents.SLOT_SELECT, { slotIndex: 3 });
                 break;
             case KeyCode.DIGIT_4:
             case KeyCode.NUM_4: // 👈 修改这里
-                EventManager.getInstance().dispatchEvent(InputEvent.SLOT_SELECT, { slotIndex: 4 });
+                EventManager.getInstance().dispatchEvent(InputEvents.SLOT_SELECT, { slotIndex: 4 });
                 break;
             case KeyCode.DIGIT_5:
             case KeyCode.NUM_5: // 👈 修改这里
-                EventManager.getInstance().dispatchEvent(InputEvent.SLOT_SELECT, { slotIndex: 5 });
+                EventManager.getInstance().dispatchEvent(InputEvents.SLOT_SELECT, { slotIndex: 5 });
                 break;
 
             // 3. 菜单/取消类
             case KeyCode.ESCAPE:
-                EventManager.getInstance().dispatchEvent(InputEvent.ACTION_CANCEL);
+                EventManager.getInstance().dispatchEvent(InputEvents.ACTION_CANCEL);
                 break;
 
 

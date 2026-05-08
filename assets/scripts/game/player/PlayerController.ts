@@ -1,15 +1,19 @@
 // scripts/game/player/PlayerController.ts
-import { math, v2, Vec2 } from 'cc';
+import { math, resources, SpriteFrame, v2, Vec2 } from 'cc';
 import { EventManager } from '../../common/manager/EventManager';
 import { ServiceLocator } from '../../common/manager/ServiceLocator';
 import { ECellState } from '../../const/GameDefine';
 import { ServiceKey } from '../../const/ServiceDefine';
-import { PlayerEvent } from '../../events';
-import { InputEvent } from '../../events/InputEvents';
+import { InputEvents } from '../../events/InputEvents';
+import { PlayerEvents } from '../../events/PlayerEvents';
 import { SystemEvents } from '../../events/SystemEvents';
 import { BaseMVCController } from '../../mvc/BaseMVCController';
 import { IMapController } from '../map/IMap';
 import { IsoUtils } from '../map/IsoUtils';
+import { DegreeUtils } from '../role/DegreeUtils';
+import { ERoleDir, ERoleState } from '../role/IRole';
+import { RoleAnimation } from '../role/RoleAnimation';
+import { RoleStateMachine } from '../role/RoleStateMachine';
 import { IToolContext } from '../tool/ITool';
 import { ToolManager } from '../tool/ToolManager';
 import { IPlayercontroller } from './IPlayer';
@@ -29,15 +33,37 @@ export enum FaceDir {
 export class PlayerController extends BaseMVCController<PlayerModel, PlayerView>
     implements IPlayercontroller {
 
+
+    // 🌟 核心：角色状态机实例
+    private _stateMachine: RoleStateMachine = null!;
+
     protected onInit(): void {
         console.log("PlayerController onInit!!!!");
+        // 1. 实例化状态机大脑
+        this._stateMachine = new RoleStateMachine();
+
+        // 2. 获取视图上的动画组件并绑定
+        // 假设你在 PlayerView 预制体的根节点挂载了 RoleAnimation
+        let roleAnim = this.view.roleAnimation;
+        if (roleAnim) {
+            roleAnim.bindStateMachine(this._stateMachine);
+            // 💡 TODO: 在这里调用 roleAnim.registerAnim 把你的 64 张切图塞进去
+            // this._registerAllAnimations(roleAnim);
+            this._loadAndRegisterAnimations(roleAnim);
+        }
+
         // 【重构后】：只监听纯粹的业务语义事件！
-        EventManager.getInstance().on(InputEvent.ACTION_USE_TOOL, this._onActionUseTool, this);
+        EventManager.getInstance().on(InputEvents.ACTION_USE_TOOL, this._onActionUseTool, this);
+        // 4. 监听摇杆事件 (名称请对齐你工程里的实际事件名)
+        EventManager.instance.on(InputEvents.JOYSTICK_MOVE, this._onJoystickMove, this);
+        EventManager.instance.on(InputEvents.JOYSTICK_END, this._onJoystickEnd, this);
     }
 
     protected onDestroy(): void {
         // 务必注销，防止内存泄漏
-        EventManager.getInstance().off(InputEvent.ACTION_USE_TOOL, this._onActionUseTool, this);
+        EventManager.getInstance().off(InputEvents.ACTION_USE_TOOL, this._onActionUseTool, this);
+        EventManager.instance.off(InputEvents.JOYSTICK_MOVE, this._onJoystickMove, this);
+        EventManager.instance.off(InputEvents.JOYSTICK_END, this._onJoystickEnd, this);
         super.onDestroy();
     }
 
@@ -63,8 +89,8 @@ export class PlayerController extends BaseMVCController<PlayerModel, PlayerView>
     }
 
 
-    // 当前朝向
-    private _faceDir: FaceDir = FaceDir.Right;
+    // // 当前朝向
+    // private _faceDir: FaceDir = FaceDir.Right;
 
     // 当前瞄准的目标格子坐标 (准星位置)
     private _targetRow: number = -1;
@@ -88,7 +114,7 @@ export class PlayerController extends BaseMVCController<PlayerModel, PlayerView>
         this._currentCol = startCol;
         // this._targetRow = startRow;
         // this._targetCol = startCol;
-        
+
 
         // 获取出生点的屏幕坐标
         const spawnPos = IsoUtils.isoToScreen(startRow, startCol);
@@ -158,14 +184,13 @@ export class PlayerController extends BaseMVCController<PlayerModel, PlayerView>
         return false;
     }
 
-
     public updateTargetGridPos(dir: Vec2): void {
-        // 1. 面朝向动画逻辑保持不变...
-        const angle = math.toDegree(Math.atan2(dir.y, dir.x));
-        if (angle > 45 && angle <= 135) this._faceDir = FaceDir.Up;
-        else if (angle > -135 && angle <= -45) this._faceDir = FaceDir.Down;
-        else if (angle > 135 || angle <= -135) this._faceDir = FaceDir.Left;
-        else if (angle > -45 && angle <= 45) this._faceDir = FaceDir.Right;
+        // // 1. 面朝向动画逻辑保持不变...
+        // const angle = math.toDegree(Math.atan2(dir.y, dir.x));
+        // if (angle > 45 && angle <= 135) this._faceDir = FaceDir.Up;
+        // else if (angle > -135 && angle <= -45) this._faceDir = FaceDir.Down;
+        // else if (angle > 135 || angle <= -135) this._faceDir = FaceDir.Left;
+        // else if (angle > -45 && angle <= 45) this._faceDir = FaceDir.Right;
 
         // 🌟 2. 神级改造：使用“前瞻探测器”进行精准等轴测锁定！
         // 假设主角往前看半个格子的距离（60像素）
@@ -189,10 +214,9 @@ export class PlayerController extends BaseMVCController<PlayerModel, PlayerView>
             this._targetCol = tc;
 
             // 🌟 派发全局事件：玩家看准了新的一块地！
-            EventManager.getInstance().dispatchEvent(PlayerEvent.TargetChanged, { row: tr, col: tc });
+            EventManager.getInstance().dispatchEvent(PlayerEvents.TargetChanged, { row: tr, col: tc });
         }
     }
-
 
     public updateCurrentGridPos(x: number, y: number): void {
 
@@ -253,37 +277,83 @@ export class PlayerController extends BaseMVCController<PlayerModel, PlayerView>
         }
     }
 
+    // ==========================================
+    // 🚀 核心：解析 64 张图片并分配给 8 个方向
+    // ==========================================
+    private _loadAndRegisterAnimations(roleAnim: RoleAnimation): void {
+        // ⚠️ 引擎铁律：loadDir 必须加载 assets/resources/ 下的目录
+        resources.loadDir('textures/role/0', SpriteFrame, (err, assets) => {
+            if (err) {
+                console.error("[PlayerController] 角色动画加载失败:", err);
+                return;
+            }
 
-    // /**
-    //  * 自动推导摄像机的终极包围盒边界
-    //  */
-    // public applyCameraBounds(): void {
-    //     if (!this.cameraFollow) return;
+            // 🚨 致命防坑：loadDir 加载出来的数组顺序可能是乱的！必须严格按名字里的数字重排！
+            assets.sort((a, b) => {
+                // 把 role0_01 里的非数字剔除，只留数字进行比对
+                const numA = parseInt(a.name.replace(/[^0-9]/ig, ''));
+                const numB = parseInt(b.name.replace(/[^0-9]/ig, ''));
+                return numA - numB;
+            });
 
-    //     // 等距视角的菱形包围盒极值计算公式：
-    //     // 宽度跨度 = (行数 + 列数) * (格子宽度 / 2)
-    //     // 高度跨度 = (行数 + 列数) * (格子高度 / 2)
-    //     const wHalf = MapConst.CELL_WIDTH / 2;
-    //     const hHalf = MapConst.CELL_HEIGHT / 2;
+            // 🌟 定义美术作图时的方向顺序 (以 8 张图为一组)
+            // 假设你的 64 张图顺序是：下(1-8), 左下(9-16), 左(17-24), 左上(25-32), 上(33-40), 右上(41-48), 右(49-56), 右下(57-64)
+            // ⚠️ 请务必根据你图片的实际朝向，调整这个数组的顺序！
+            const artDirOrder = [
+                ERoleDir.DOWN,
+                ERoleDir.LEFT,
+                ERoleDir.RIGHT,
+                ERoleDir.UP,
+                ERoleDir.LEFT_DOWN,
+                ERoleDir.RIGHT_DOWN,
+                ERoleDir.LEFT_UP,
+                ERoleDir.RIGHT_UP,
+            ];
 
-    //     const maxW = (this._model.rows + this._model.cols) * wHalf;
-    //     const maxH = (this._model.rows + this._model.cols) * hHalf;
+            const framesPerDir = 8; // 每个方向 8 张图
 
-    //     // 根据 isoToScreen 公式推导极值坐标点：
-    //     // 最左点 X = -rows * wHalf
-    //     // 最下点 Y = -(rows + cols) * hHalf
-    //     const minX = -this._model.rows * wHalf;
-    //     const minY = -(this._model.rows + this._model.cols) * hHalf;
+            for (let i = 0; i < artDirOrder.length; i++) {
+                const dir = artDirOrder[i];
+                const startIndex = i * framesPerDir;
+                const dirFrames = assets.slice(startIndex, startIndex + framesPerDir);
 
-    //     // 组装成 Rect (x, y, width, height)
-    //     const dynamicBounds = new math.Rect(minX, minY, maxW, maxH);
+                // 1. 注册跑动状态 (MOVING)：8张图，帧率设置为 10，开启循环
+                roleAnim.registerAnim(ERoleState.MOVING, dir, dirFrames, 10, true);
 
-    //     // 【核心实装】：把算好的边界动态赋值给摄像机
-    //     this.cameraFollow.mapBounds = dynamicBounds;
-    //     this.cameraFollow.enableBounds = true;
+                // 2. 注册待机状态 (IDLE)：没有待机图的话，直接拿跑动的第一张图作为站立姿势，不循环
+                roleAnim.registerAnim(ERoleState.IDLE, dir, [dirFrames[0]], 1, false);
+            }
 
-    //     console.log(`[摄像机限制] 动态地图边界已生效: ${dynamicBounds.toString()}`);
-    // }
+            // 全部加载并注册完毕后，赋予角色初始状态：向下发呆
+            this._stateMachine.setStateAndDir(ERoleState.IDLE, ERoleDir.DOWN);
+        });
+    }
 
+    // ==========================================
+    // 🎮 摇杆驱动大脑
+    // ==========================================
+    private _onJoystickMove(dirVec: Vec2): void {
+        if (dirVec.lengthSqr() > 0.01) {
+            // 转换摇杆向量为 8 方向枚举
+            const targetDir = DegreeUtils.vecTo8Dir(dirVec);
+
+            // 告诉状态机切换动作，状态机内部会去重，不会引发无限重播
+            this._stateMachine.setStateAndDir(ERoleState.MOVING, targetDir);
+
+            // // 更新 Model 里的速度，供 PlayerView 在 Update 中执行真实位移
+            // if (this.model) {
+            //     this.model.velocity = dirVec;
+            // }
+        }
+    }
+
+    private _onJoystickEnd(): void {
+        // 松开摇杆，进入发呆状态，并且保持最后面向的方向
+        this._stateMachine.setStateAndDir(ERoleState.IDLE, this._stateMachine.dir);
+
+        // if (this.model) {
+        //     this.model.velocity = Vec3.ZERO;
+        // }
+    }
 
 }

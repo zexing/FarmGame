@@ -1,7 +1,7 @@
 import { SingletonManager } from "../../common/base/SingletonManager";
 import { EventManager } from "../../common/manager/EventManager";
 import { Season } from "../../const/GameDefine";
-import { TimeEvent } from "../../events/FarmEvents";
+import { TimeEvents } from "../../events/FarmEvents";
 
 export class WorldTimeManager extends SingletonManager {
     public year: number = 1;
@@ -24,7 +24,7 @@ export class WorldTimeManager extends SingletonManager {
         console.log(`🌙 太阳下山了，开始执行第${this.day}天的结算法术...`);
 
         // 1. 派发当天结束事件
-        EventManager.getInstance().dispatchEvent(TimeEvent.DayEnd, {
+        EventManager.getInstance().dispatchEvent(TimeEvents.DayEnd, {
             year: this.year, season: this.season, day: this.day
         });
 
@@ -43,17 +43,17 @@ export class WorldTimeManager extends SingletonManager {
 
         // 4. 派发跃迁事件
         if (isYearChanged) {
-            EventManager.getInstance().dispatchEvent(TimeEvent.YearChanged, { year: this.year });
+            EventManager.getInstance().dispatchEvent(TimeEvents.YearChanged, { year: this.year });
         }
         if (isSeasonChanged) {
-            EventManager.getInstance().dispatchEvent(TimeEvent.SeasonChanged, { season: this.season });
+            EventManager.getInstance().dispatchEvent(TimeEvents.SeasonChanged, { season: this.season });
         }
 
         // 5. 状态重置与天亮UI刷新
-        EventManager.getInstance().dispatchEvent(TimeEvent.ActionPointReset);
+        EventManager.getInstance().dispatchEvent(TimeEvents.ActionPointReset);
 
         console.log(`🌅 鸡鸣狗叫，天亮了！当前是 第${this.year}年/第${this.season}季/第${this.day}天。`);
-        EventManager.getInstance().dispatchEvent(TimeEvent.DayBegin, {
+        EventManager.getInstance().dispatchEvent(TimeEvents.DayBegin, {
             year: this.year, season: this.season, day: this.day
         });
     }

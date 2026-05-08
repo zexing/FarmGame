@@ -2,7 +2,7 @@
 //  * 时间面板 — TimePanel
 //  *
 //  * 职责：
-//  * - 监听 TimeEvent.DayBegin，实时更新游戏内日期 / 季节 / 天气显示
+//  * - 监听 TimeEvents.DayBegin，实时更新游戏内日期 / 季节 / 天气显示
 //  * - 在 start() 从 WorldTimeManager 读取初始状态（首屏正确显示）
 //  *
 //  * 节点结构（在 Cocos Editor 中搭建）：
@@ -47,11 +47,11 @@
 //     // ── Editor 属性 ──────────────────────────────────────────────────────────
 
 //     /** 当前天数标签（显示如 "第 5 天"） */
-//     @property({ type: Label, tooltip: '当前游戏天数 Label，TimeEvent.DayBegin 触发时更新' })
+//     @property({ type: Label, tooltip: '当前游戏天数 Label，TimeEvents.DayBegin 触发时更新' })
 //     dayLabel: Label = null!;
 
 //     /** 当前季节标签（显示如 "春季"） */
-//     @property({ type: Label, tooltip: '当前季节 Label，TimeEvent.DayBegin / 季节切换时更新' })
+//     @property({ type: Label, tooltip: '当前季节 Label，TimeEvents.DayBegin / 季节切换时更新' })
 //     seasonLabel: Label = null!;
 
 //     /**
@@ -59,13 +59,13 @@
 //      *
 //      * 若不需要显示天气，在 Editor 中留空即可，不会报错。
 //      */
-//     @property({ type: Label, tooltip: '当前天气 Label（可选），TimeEvent.DayBegin 触发时更新，不需要可留空' })
+//     @property({ type: Label, tooltip: '当前天气 Label（可选），TimeEvents.DayBegin 触发时更新，不需要可留空' })
 //     weatherLabel: Label = null!;
 
 //     // ── Cocos 生命周期 ────────────────────────────────────────────────────────
 
 //     protected onLoad(): void {
-//         EventManager.instance.on(TimeEvent.DayBegin, this._onDayBegin, this);
+//         EventManager.instance.on(TimeEvents.DayBegin, this._onDayBegin, this);
 //     }
 
 //     protected start(): void {
@@ -80,7 +80,7 @@
 //     }
 
 //     protected onDestroy(): void {
-//         EventManager.instance.off(TimeEvent.DayBegin, this._onDayBegin, this);
+//         EventManager.instance.off(TimeEvents.DayBegin, this._onDayBegin, this);
 //     }
 
 //     // ── 事件处理 ──────────────────────────────────────────────────────────────

@@ -39,15 +39,15 @@
 //     // ── Editor 属性（将各子面板节点拖入）──────────────────────────────────────
 
 //     /** 金币面板（挂 GoldPanel 组件的节点） */
-//     @property({ type: GoldPanel, tooltip: '金币面板组件，负责监听 PlayerEvent.GoldChanged 并更新显示' })
+//     @property({ type: GoldPanel, tooltip: '金币面板组件，负责监听 PlayerEvents.GoldChanged 并更新显示' })
 //     goldPanel: GoldPanel = null!;
 
 //     /** 经验 / 等级面板（挂 ExpPanel 组件的节点） */
-//     @property({ type: ExpPanel, tooltip: '经验等级面板组件，负责监听 PlayerEvent.ExpChanged / LevelUp 并更新显示' })
+//     @property({ type: ExpPanel, tooltip: '经验等级面板组件，负责监听 PlayerEvents.ExpChanged / LevelUp 并更新显示' })
 //     expPanel: ExpPanel = null!;
 
 //     /** 时间面板（挂 TimePanel 组件的节点） */
-//     @property({ type: TimePanel, tooltip: '时间面板组件，负责监听 TimeEvent.DayBegin 并更新日期 / 季节显示' })
+//     @property({ type: TimePanel, tooltip: '时间面板组件，负责监听 TimeEvents.DayBegin 并更新日期 / 季节显示' })
 //     timePanel: TimePanel = null!;
 
 //     /** Toast 提示视图（挂 ToastView 组件的节点） */

@@ -18,6 +18,8 @@
  */
 
 import { _decorator, Component, EventTouch, Node, UITransform, v2, v3, Vec2, Vec3 } from 'cc';
+import { EventManager } from '../../common/manager/EventManager';
+import { InputEvents } from '../../events/InputEvents';
 
 const { ccclass, property } = _decorator;
 
@@ -147,6 +149,8 @@ export class JoystickView extends Component {
         // 更新方向向量（归一化到 0~1）
         this._direction = v2(dx / this.radius, dy / this.radius);
         e.propagationStopped = true;
+
+        EventManager.instance.dispatchEvent(InputEvents.JOYSTICK_MOVE, this._direction);
     }
 
     private _onTouchEnd(e: EventTouch): void {
@@ -154,6 +158,7 @@ export class JoystickView extends Component {
         this._reset();
         e.propagationStopped = true;
         this._hideJoystick();
+        EventManager.instance.dispatchEvent(InputEvents.JOYSTICK_END);
     }
 
     // ── 内部 ──────────────────────────────────────────────────────────────────

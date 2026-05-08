@@ -4,7 +4,7 @@
  * 职责：
  * - 管理玩家背包内所有物品的数量（itemId → count）
  * - 提供增删查的原子操作
- * - 派发 PlayerEvent.ItemAdded / ItemRemoved 事件，通知 UI 刷新
+ * - 派发 PlayerEvents.ItemAdded / ItemRemoved 事件，通知 UI 刷新
  * - 支持存档序列化 / 反序列化
  *
  * 设计原则：
@@ -31,7 +31,7 @@ import { IInventorySaveData } from 'db://assets/scripts/game/player/IPlayer';
 import { SingletonManager } from '../../common/base/SingletonManager';
 import { EventManager } from '../../common/manager/EventManager';
 import { EconomyConst } from '../../const/GameDefine';
-import { PlayerEvent } from '../../events';
+import { PlayerEvents } from '../../events/PlayerEvents';
 
 
 export class InventoryManager extends SingletonManager {
@@ -57,7 +57,7 @@ export class InventoryManager extends SingletonManager {
      * 增加物品数量
      *
      * - 超过 MAX_STACK 的部分会被截断（打 warn 日志）
-     * - 成功增加后派发 PlayerEvent.ItemAdded
+     * - 成功增加后派发 PlayerEvents.ItemAdded
      *
      * @param itemId  物品 ID
      * @param count   增加数量（必须 > 0）
@@ -85,7 +85,7 @@ export class InventoryManager extends SingletonManager {
             console.warn(`[InventoryManager] ${itemId} 增加 ${count} → 实际加 ${actualAdd}（已封顶）`);
         }
 
-        EventManager.instance.dispatchEvent(PlayerEvent.ItemAdded, {
+        EventManager.instance.dispatchEvent(PlayerEvents.ItemAdded, {
             itemId,
             count: actualAdd,
         });
@@ -118,7 +118,7 @@ export class InventoryManager extends SingletonManager {
             this._items.set(itemId, newCount);
         }
 
-        EventManager.instance.dispatchEvent(PlayerEvent.ItemRemoved, {
+        EventManager.instance.dispatchEvent(PlayerEvents.ItemRemoved, {
             itemId,
             count,
         });

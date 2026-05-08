@@ -10,21 +10,21 @@
 export {
     BuildingEvent,
     ExploreEvent,
-    FarmEvent,
-    FarmUIEvent,
+    FarmEvents,
+    FarmUIEvents as FarmUIEvents,
     LivestockEvent,
-    NpcEvent,
-    TimeEvent
+    NpcEvents as NpcEvent,
+    TimeEvents
 } from './FarmEvents';
 
 export {
-    PlayerEvent
+    PlayerEvents as PlayerEvents
 } from './PlayerEvents';
 
 // ── 系统 & 网络事件（SystemEvents.ts）────────────────────────────────────────
 export {
     NetworkEvent,
-    SystemEvents as SystemEvent
+    SystemEvents
 } from './SystemEvents';
 
 

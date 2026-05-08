@@ -2,7 +2,7 @@ import { Node } from 'cc';
 import { EventManager } from '../../../common/manager/EventManager';
 import { PoolManager } from '../../../common/manager/PoolManager';
 import { ECellState } from '../../../const/GameDefine';
-import { FarmEvent, TimeEvent } from '../../../events';
+import { FarmEvents, TimeEvents } from '../../../events';
 import { BaseMVCSubCtrl } from '../../../mvc/BaseMVCSubCtrl';
 import { ICellData, IMapModel, IMapView } from '../IMap';
 import { IsoUtils } from '../IsoUtils';
@@ -19,13 +19,13 @@ export class CropEntityCtrl extends BaseMVCSubCtrl {
     public init(model: IMapModel, view: IMapView): void {
         super.init(model, view);
         // 🌟 它独立监听事件，和 GroundGridCtrl 互不干扰！
-        EventManager.instance.on(FarmEvent.CellStateChanged, this._onCellStateChanged, this);
-        EventManager.instance.on(TimeEvent.DayBegin, this.refreshAll, this);
+        EventManager.instance.on(FarmEvents.CellStateChanged, this._onCellStateChanged, this);
+        EventManager.instance.on(TimeEvents.DayBegin, this.refreshAll, this);
     }
 
     public destroy(): void {
-        EventManager.instance.off(FarmEvent.CellStateChanged, this._onCellStateChanged, this);
-        EventManager.instance.off(TimeEvent.DayBegin, this.refreshAll, this);
+        EventManager.instance.off(FarmEvents.CellStateChanged, this._onCellStateChanged, this);
+        EventManager.instance.off(TimeEvents.DayBegin, this.refreshAll, this);
         this._clearAllCrops();
         super.destroy();
     }

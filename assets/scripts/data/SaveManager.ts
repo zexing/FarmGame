@@ -4,7 +4,7 @@
 //  * 职责：
 //  * - 将所有游戏系统的运行时数据序列化为 JSON 并写入 localStorage
 //  * - 从 localStorage 读取存档并分发给各系统恢复数据
-//  * - 自动存档（监听 TimeEvent.DayEnd）
+//  * - 自动存档（监听 TimeEvents.DayEnd）
 //  * - 节流保护：两次存档之间最少间隔 MIN_SAVE_INTERVAL_MS，防止频繁写磁盘
 //  *
 //  * 解耦设计（Provider 注册模式）：
@@ -19,7 +19,7 @@
 //  *     );
 //  *
 //  * 自动存档触发时机：
-//  *   1. 每天结束（TimeEvent.DayEnd）
+//  *   1. 每天结束（TimeEvents.DayEnd）
 //  *   2. 游戏切到后台（需在 GameScene 监听 Cocos 的 hide 事件后手动调用 save()）
 //  *   3. 玩家点击"回主界面"按钮时
 //  *
@@ -139,7 +139,7 @@
 //         if (this._initialized) return;
 //         this._initialized = true;
 
-//         EventManager.instance.on(TimeEvent.DayEnd, this._onDayEnd, this);
+//         EventManager.instance.on(TimeEvents.DayEnd, this._onDayEnd, this);
 //         // console.log('[SaveManager] 初始化完成，已启动自动存档监听');
 //     }
 
@@ -150,7 +150,7 @@
 //         if (!this._initialized) return;
 //         this._initialized = false;
 
-//         EventManager.instance.off(TimeEvent.DayEnd, this._onDayEnd, this);
+//         EventManager.instance.off(TimeEvents.DayEnd, this._onDayEnd, this);
 //         // console.log('[SaveManager] 已关闭');
 //     }
 

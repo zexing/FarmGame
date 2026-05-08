@@ -2,7 +2,7 @@
 //  * 经验 / 等级面板 — ExpPanel
 //  *
 //  * 职责：
-//  * - 监听 PlayerEvent.ExpChanged / PlayerEvent.LevelUp，实时更新等级 + 经验条 + 经验文字
+//  * - 监听 PlayerEvents.ExpChanged / PlayerEvents.LevelUp，实时更新等级 + 经验条 + 经验文字
 //  * - 在 start() 从 PlayerView 读取初始等级 / 经验（首屏正确显示）
 //  *
 //  * 节点结构（在 Cocos Editor 中搭建）：
@@ -34,7 +34,7 @@
 //     // ── Editor 属性 ──────────────────────────────────────────────────────────
 
 //     /** 等级标签（显示如 "Lv.3"） */
-//     @property({ type: Label, tooltip: '等级 Label，显示格式 "Lv.N"，PlayerEvent.LevelUp 触发时更新' })
+//     @property({ type: Label, tooltip: '等级 Label，显示格式 "Lv.N"，PlayerEvents.LevelUp 触发时更新' })
 //     levelLabel: Label = null!;
 
 //     /** 经验文字标签（显示如 "35 / 200"，满级显示 "MAX"） */
@@ -60,8 +60,8 @@
 
 //     protected onLoad(): void {
 //         const em = EventManager.instance;
-//         em.on(PlayerEvent.ExpChanged, this._onExpChanged, this);
-//         em.on(PlayerEvent.LevelUp,   this._onLevelUp,    this);
+//         em.on(PlayerEvents.ExpChanged, this._onExpChanged, this);
+//         em.on(PlayerEvents.LevelUp,   this._onLevelUp,    this);
 //     }
 
 //     protected start(): void {
@@ -74,8 +74,8 @@
 
 //     protected onDestroy(): void {
 //         const em = EventManager.instance;
-//         em.off(PlayerEvent.ExpChanged, this._onExpChanged, this);
-//         em.off(PlayerEvent.LevelUp,   this._onLevelUp,    this);
+//         em.off(PlayerEvents.ExpChanged, this._onExpChanged, this);
+//         em.off(PlayerEvents.LevelUp,   this._onLevelUp,    this);
 //     }
 
 //     // ── 事件处理 ──────────────────────────────────────────────────────────────

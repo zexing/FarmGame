@@ -1,7 +1,7 @@
 import { ConfigManager } from '../../common/manager/ConfigManager'; // ✅ 引入配置大管家
 import { EventManager } from '../../common/manager/EventManager';
 import { ICropConfig } from '../../config/CropConfig';
-import { FarmEvent } from '../../events/FarmEvents';
+import { FarmEvents } from '../../events/FarmEvents';
 import { SystemEvents } from '../../events/SystemEvents';
 import { InventoryManager } from '../inventory/InventoryManager'; // ✅ 引入背包大管家
 import { ICellData } from '../map/IMap';
@@ -68,7 +68,7 @@ export class SickleTool implements ITool {
         }
 
         // 通知地图层刷新该格子的贴图表现
-        EventManager.getInstance().dispatchEvent(FarmEvent.CellStateChanged, { row, col, newState: cell.state });
+        EventManager.getInstance().dispatchEvent(FarmEvents.CellStateChanged, { row, col, newState: cell.state });
 
         // ✅ 成功飘字，带上动态配置表里的中文名字
         EventManager.getInstance().dispatchEvent(SystemEvents.GameTip, { msg: `成功收割了 1 个 [${cropInfo.name}]` });

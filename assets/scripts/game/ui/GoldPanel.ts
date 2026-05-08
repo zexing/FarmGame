@@ -2,7 +2,7 @@
 //  * 金币面板 — GoldPanel
 //  *
 //  * 职责：
-//  * - 监听 PlayerEvent.GoldChanged，实时更新金币数量显示
+//  * - 监听 PlayerEvents.GoldChanged，实时更新金币数量显示
 //  * - 在 start() 从 PlayerView 读取初始金币值（首屏正确显示）
 //  *
 //  * 节点结构（在 Cocos Editor 中搭建）：
@@ -31,7 +31,7 @@
 //     // ── Editor 属性 ──────────────────────────────────────────────────────────
 
 //     /** 金币数值 Label */
-//     @property({ type: Label, tooltip: '金币数量 Label，PlayerEvent.GoldChanged 触发时更新' })
+//     @property({ type: Label, tooltip: '金币数量 Label，PlayerEvents.GoldChanged 触发时更新' })
 //     goldLabel: Label = null!;
 
 //     /**
@@ -46,7 +46,7 @@
 //     // ── Cocos 生命周期 ────────────────────────────────────────────────────────
 
 //     protected onLoad(): void {
-//         EventManager.instance.on(PlayerEvent.GoldChanged, this._onGoldChanged, this);
+//         EventManager.instance.on(PlayerEvents.GoldChanged, this._onGoldChanged, this);
 //     }
 
 //     protected start(): void {
@@ -56,7 +56,7 @@
 //     }
 
 //     protected onDestroy(): void {
-//         EventManager.instance.off(PlayerEvent.GoldChanged, this._onGoldChanged, this);
+//         EventManager.instance.off(PlayerEvents.GoldChanged, this._onGoldChanged, this);
 //     }
 
 //     // ── 事件处理 ──────────────────────────────────────────────────────────────

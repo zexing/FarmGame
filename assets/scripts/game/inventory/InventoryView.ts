@@ -7,7 +7,7 @@
  * - 无独立 Model/Controller：数据直接从 InventoryManager 单例读取，
  *   经 _toInventoryItem() 转换为 IInventoryItem[] 后交给 CommonList 渲染
  * - 管理三个 Tab（全部 / 种子 / 作物），切换时重新过滤数据
- * - 监听 PlayerEvent.ItemAdded / ItemRemoved，背包变化时自动刷新当前 Tab
+ * - 监听 PlayerEvents.ItemAdded / ItemRemoved，背包变化时自动刷新当前 Tab
  * - CommonList.clickCallBack → 选中格子时填充并展示内嵌详情面板
  *
  * 两种使用方式：
@@ -39,7 +39,7 @@ import { CommonListItem } from '../../common/component/list/CommonListItem';
 import { EventManager } from '../../common/manager/EventManager';
 // import { getCropConfigBySeed } from '../../config/CropConfig';
 import { GameDefine } from '../../const/GameDefine';
-import { PlayerEvent } from '../../events';
+import { PlayerEvents } from '../../events/PlayerEvents';
 import { IInventoryItem, InventoryTab } from './IInventory';
 import { InventoryManager } from './InventoryManager';
 
@@ -111,8 +111,8 @@ export class InventoryView extends BaseComponent {
 
         // 订阅背包变化事件，实时刷新
         const em = EventManager.instance;
-        em.on(PlayerEvent.ItemAdded,   this._onInventoryChanged, this);
-        em.on(PlayerEvent.ItemRemoved, this._onInventoryChanged, this);
+        em.on(PlayerEvents.ItemAdded,   this._onInventoryChanged, this);
+        em.on(PlayerEvents.ItemRemoved, this._onInventoryChanged, this);
 
         // 每次打开重置详情面板
         if (this.detailPanel) this.detailPanel.active = false;
@@ -131,8 +131,8 @@ export class InventoryView extends BaseComponent {
         this.itemList?.clearClickCallBack();
 
         const em = EventManager.instance;
-        em.off(PlayerEvent.ItemAdded,   this._onInventoryChanged, this);
-        em.off(PlayerEvent.ItemRemoved, this._onInventoryChanged, this);
+        em.off(PlayerEvents.ItemAdded,   this._onInventoryChanged, this);
+        em.off(PlayerEvents.ItemRemoved, this._onInventoryChanged, this);
 
         console.log('[InventoryView] 已关闭');
     }
@@ -303,7 +303,7 @@ export class InventoryView extends BaseComponent {
     protected onDestroy(): void {
         // 防止组件销毁时事件未解绑（正常流程由 closeView 处理，此处兜底）
         const em = EventManager.instance;
-        em.off(PlayerEvent.ItemAdded,   this._onInventoryChanged, this);
-        em.off(PlayerEvent.ItemRemoved, this._onInventoryChanged, this);
+        em.off(PlayerEvents.ItemAdded,   this._onInventoryChanged, this);
+        em.off(PlayerEvents.ItemRemoved, this._onInventoryChanged, this);
     }
 }

@@ -2,7 +2,7 @@
 import { Rect } from 'cc';
 import { EventManager } from '../../common/manager/EventManager';
 import { ECellState, MapConst } from '../../const/GameDefine';
-import { TimeEvent } from '../../events';
+import { TimeEvents } from '../../events';
 import { SystemEvents } from '../../events/SystemEvents';
 import { BaseMVCController } from '../../mvc/BaseMVCController';
 import { CropEntityCtrl } from './crop_entity/CropEntityCtrl';
@@ -39,14 +39,14 @@ export class MapController extends BaseMVCController<MapModel, MapView>
         this._broadcastWorldBounds();
 
         // // 监听世界时间管理器的跨天事件
-        EventManager.getInstance().on(TimeEvent.DayEnd, this._onDayEndSettlement, this);
+        EventManager.getInstance().on(TimeEvents.DayEnd, this._onDayEndSettlement, this);
     }
 
     protected onDestroy(): void {
         console.log("[MapController] 业务逻辑销毁清理");
 
         // // 务必注销监听，防止内存泄漏
-        EventManager.getInstance().off(TimeEvent.DayEnd, this._onDayEndSettlement, this);
+        EventManager.getInstance().off(TimeEvents.DayEnd, this._onDayEndSettlement, this);
     }
 
     /**

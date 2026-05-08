@@ -1,6 +1,6 @@
 import { EventManager } from '../../common/manager/EventManager';
 import { ECellState } from '../../const/GameDefine';
-import { FarmEvent } from '../../events/FarmEvents';
+import { FarmEvents } from '../../events/FarmEvents';
 import { SystemEvents } from '../../events/SystemEvents';
 import { ICellData } from '../map/IMap';
 import { ITool, IToolContext } from './ITool';
@@ -29,7 +29,7 @@ export class WateringCanTool implements ITool {
         cell.isWatered = true;
 
         // 2. 派发事件通知视图层刷新
-        EventManager.getInstance().dispatchEvent(FarmEvent.CellStateChanged, {
+        EventManager.getInstance().dispatchEvent(FarmEvents.CellStateChanged, {
             row: row,
             col: col,
             newState: cell.state

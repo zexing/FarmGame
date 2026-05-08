@@ -1,6 +1,6 @@
 import { EventManager } from '../../common/manager/EventManager';
 import { ECellState } from '../../const/GameDefine';
-import { FarmEvent } from '../../events/FarmEvents';
+import { FarmEvents } from '../../events/FarmEvents';
 import { SystemEvents } from '../../events/SystemEvents';
 import { ICellData } from '../map/IMap';
 import { ITool, IToolContext } from './ITool';
@@ -34,7 +34,7 @@ export class HoeTool implements ITool {
         }
 
         cell.state = ECellState.Tilled;
-        EventManager.getInstance().dispatchEvent(FarmEvent.CellStateChanged, { row, col, newState: cell.state });
+        EventManager.getInstance().dispatchEvent(FarmEvents.CellStateChanged, { row, col, newState: cell.state });
         
         // ✅ 成功飘字
         EventManager.getInstance().dispatchEvent(SystemEvents.GameTip, { msg: `成功开垦了土地！` });

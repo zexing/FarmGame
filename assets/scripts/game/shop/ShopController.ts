@@ -7,7 +7,7 @@
 //  * - 买卖完成后派发 ShopEvent，并驱动 ShopView 刷新列表
 //  *
 //  * 不负责：
-//  * - UI 更新（GoldPanel 自动监听 PlayerEvent.GoldChanged）
+//  * - UI 更新（GoldPanel 自动监听 PlayerEvents.GoldChanged）
 //  * - 列表数据的渲染（由 ShopView → ShopItemListView 完成）
 //  *
 //  * 调用链示例（购买）：
