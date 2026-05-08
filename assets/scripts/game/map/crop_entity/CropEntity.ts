@@ -14,13 +14,13 @@ export class CropEntity extends BaseComponent {
         if (!data) return;
 
         // 动态拼装路径加载
-        const imagePath = `textures/crop/${data.cropId}_${data.growStage}/spriteFrame`;
+        const imagePath = `textures/crop/crop_${data.cropId}_${data.growStage}/spriteFrame`;
         
         resources.load(imagePath, SpriteFrame, (err, frame) => {
             if (err) {
-                // 兜底色块
-                const greenValue = Math.max(50, 255 - data.growStage * 60);
-                this.cropSprite.color = new Color(0, greenValue, 0, 255);
+                // // 兜底色块
+                // const greenValue = Math.max(50, 255 - data.growStage * 60);
+                // this.cropSprite.color = new Color(0, greenValue, 0, 255);
                 return;
             }
             if (this.isValid && this.cropSprite) {

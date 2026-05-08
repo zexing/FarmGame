@@ -133,7 +133,7 @@
     "_anchorPoint": {
       "__type__": "cc.Vec2",
       "x": 0.5,
-      "y": 0
+      "y": 0.1
     },
     "_id": ""
   },
@@ -164,7 +164,7 @@
       "a": 255
     },
     "_spriteFrame": {
-      "__uuid__": "416adb61-07db-429e-a0c1-de6065c8bbd0@f9941",
+      "__uuid__": "77549b81-5bfc-4c07-9a53-6c19c658093e@f9941",
       "__expectedType__": "cc.SpriteFrame"
     },
     "_type": 0,
@@ -257,7 +257,6 @@
       "__id__": 0
     },
     "fileId": "4eOatBxuJKibNh6gWIjirg",
-    "instance": null,
     "targetOverrides": null
   }
 ]
