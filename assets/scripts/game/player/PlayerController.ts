@@ -2,7 +2,7 @@
 import { math, resources, SpriteFrame, v2, Vec2 } from 'cc';
 import { EventManager } from '../../common/manager/EventManager';
 import { ServiceLocator } from '../../common/manager/ServiceLocator';
-import { ECellState } from '../../const/GameDefine';
+import { ECellState, MapConst } from '../../const/GameDefine';
 import { ServiceKey } from '../../const/ServiceDefine';
 import { InputEvents } from '../../events/InputEvents';
 import { PlayerEvents } from '../../events/PlayerEvents';
@@ -69,37 +69,15 @@ export class PlayerController extends BaseMVCController<PlayerModel, PlayerView>
 
     // 当前玩家所在的逻辑格子坐标（用于种地、挥锄头等交互）
     private _currentRow: number = 0;
-    // public get currentRow(): number {
-    //     return this._currentRow;
-    // }
-    // public set currentRow(value: number) {
-    //     this._currentRow = value;
-    // }
     private _currentCol: number = 0;
-    // public get currentCol(): number {
-    //     return this._currentCol;
-    // }
-    // public set currentCol(value: number) {
-    //     this._currentCol = value;
-    // }
-
 
     public getCurrentRowCol(): { row: number, col: number } {
         return { row: this._currentRow, col: this._currentCol };
     }
 
-
-    // // 当前朝向
-    // private _faceDir: FaceDir = FaceDir.Right;
-
     // 当前瞄准的目标格子坐标 (准星位置)
     private _targetRow: number = -1;
     private _targetCol: number = -1;
-
-    // // 暴露给外部读取
-    // public get faceDir(): FaceDir { return this._faceDir; }
-    // public get targetRow(): number { return this._targetRow; }
-    // public get targetCol(): number { return this._targetCol; }
 
     /**
      * 放置主角到指定网格，并强制更新一次摄像机和视口
@@ -112,8 +90,6 @@ export class PlayerController extends BaseMVCController<PlayerModel, PlayerView>
         const startCol = Math.round(mapCtrl.getCols() / 2);
         this._currentRow = startRow;
         this._currentCol = startCol;
-        // this._targetRow = startRow;
-        // this._targetCol = startCol;
 
 
         // 获取出生点的屏幕坐标
@@ -123,7 +99,7 @@ export class PlayerController extends BaseMVCController<PlayerModel, PlayerView>
         this.view.updatePlayerPos(spawnPos)
 
         // 更新目标格子
-        this.updateTargetGridPos(v2(1, 0));
+        this.updateTargetGridPos(v2(0, 0));
     }
 
     /**
@@ -185,18 +161,10 @@ export class PlayerController extends BaseMVCController<PlayerModel, PlayerView>
     }
 
     public updateTargetGridPos(dir: Vec2): void {
-        // // 1. 面朝向动画逻辑保持不变...
-        // const angle = math.toDegree(Math.atan2(dir.y, dir.x));
-        // if (angle > 45 && angle <= 135) this._faceDir = FaceDir.Up;
-        // else if (angle > -135 && angle <= -45) this._faceDir = FaceDir.Down;
-        // else if (angle > 135 || angle <= -135) this._faceDir = FaceDir.Left;
-        // else if (angle > -45 && angle <= 45) this._faceDir = FaceDir.Right;
 
-        // 🌟 2. 神级改造：使用“前瞻探测器”进行精准等轴测锁定！
-        // 假设主角往前看半个格子的距离（60像素）
-        const lookAheadDist = 60;
-        const targetScreenX = this.view.node.position.x + dir.x * lookAheadDist;
-        const targetScreenY = this.view.node.position.y + dir.y * lookAheadDist;
+        // const lookAheadDist = 0;
+        const targetScreenX = this.view.node.position.x + dir.x * MapConst.CELL_WIDTH / 2;
+        const targetScreenY = this.view.node.position.y + dir.y * MapConst.CELL_HEIGHT / 2;
 
         const mapCtrl = ServiceLocator.get<IMapController>(ServiceKey.IMapController);
         if (!mapCtrl) return;
@@ -216,6 +184,7 @@ export class PlayerController extends BaseMVCController<PlayerModel, PlayerView>
             // 🌟 派发全局事件：玩家看准了新的一块地！
             EventManager.getInstance().dispatchEvent(PlayerEvents.TargetChanged, { row: tr, col: tc });
         }
+        console.log("PlayerController updateTargetGridPos: ", tr, "--", tc);
     }
 
     public updateCurrentGridPos(x: number, y: number): void {
