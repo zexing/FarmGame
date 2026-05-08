@@ -4,8 +4,9 @@ import { EventManager } from '../../common/manager/EventManager';
 import { ServiceLocator } from '../../common/manager/ServiceLocator';
 import { ECellState } from '../../const/GameDefine';
 import { ServiceKey } from '../../const/ServiceDefine';
-import { PlayerEvent, SystemEvent } from '../../events';
+import { PlayerEvent } from '../../events';
 import { InputEvent } from '../../events/InputEvents';
+import { SystemEvents } from '../../events/SystemEvents';
 import { BaseMVCController } from '../../mvc/BaseMVCController';
 import { IMapController } from '../map/IMap';
 import { IsoUtils } from '../map/IsoUtils';
@@ -232,7 +233,7 @@ export class PlayerController extends BaseMVCController<PlayerModel, PlayerView>
 
         if (!currentTool) {
             // console.log("❌ [交互提示] 手里空空如也，没拿工具！");
-            EventManager.instance.dispatchEvent(SystemEvent.GameTip, {
+            EventManager.instance.dispatchEvent(SystemEvents.GameTip, {
                 msg: "手里空空如也，没拿工具！",
             })
             return;
@@ -246,7 +247,7 @@ export class PlayerController extends BaseMVCController<PlayerModel, PlayerView>
             }
         } else {
             // console.log(`❌ [交互提示] 这里无法使用 ${currentTool.name}`);
-            EventManager.instance.dispatchEvent(SystemEvent.GameTip, {
+            EventManager.instance.dispatchEvent(SystemEvents.GameTip, {
                 msg: `这里无法使用 ${currentTool.name}`,
             })
         }

@@ -214,16 +214,6 @@ export namespace MapConst {
     /** 世界地图总列数 */
     export const WORLD_COLS = 32;
 
-    // /** MVP 初始农场行数 */
-    // export const INIT_ROWS = 4;
-    // /** MVP 初始农场列数 */
-    // export const INIT_COLS = 4;
-    /**
-    //  * 初始已耕地格子数量
-    //  * 默认左上角 2×2 = 4 格已耕地，其余 12 格为空地
-    //  */
-    // export const INIT_TILLED = 4;
-
     /**
      * 格子像素宽度（2.5D 等距视角下的菱形格宽）
      * 实际渲染时：格子中心 x 偏移 = CELL_WIDTH / 2 * (col - row)
@@ -235,10 +225,16 @@ export namespace MapConst {
      */
     export const CELL_HEIGHT = 96;
 
-    /** 地图可见区域宽（设计分辨率） */
-    export const VIEW_WIDTH = 1080;
-    /** 地图可见区域高（设计分辨率） */
-    export const VIEW_HEIGHT = 1920;
+    /**
+     * 格子内斜边长，用于计算视窗格子数量
+     */
+    export const CELL_RADIUS = 80;
+
+
+    // /** 地图可见区域宽（设计分辨率） */
+    // export const VIEW_WIDTH = 1080;
+    // /** 地图可见区域高（设计分辨率） */
+    // export const VIEW_HEIGHT = 1920;
 
 
     // 🌟 新增：大世界区块配置

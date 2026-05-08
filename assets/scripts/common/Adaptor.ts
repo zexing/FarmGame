@@ -2,7 +2,7 @@
 //-- 屏幕适配
 //-------------------------------------
 import { Node, ResolutionPolicy, screen, size, sys, view, Widget } from "cc";
-import { SystemEvent } from "../events";
+import { SystemEvents } from "../events/SystemEvents";
 import { EventManager } from "./manager/EventManager";
 
 //设计尺寸
@@ -80,7 +80,7 @@ export default class Adaptor {
 			// console.log("......窗口事件 resize");
 			// ScreenHelper.hideCocosToolbar();
 			// Adaptor.adaptScreen();
-			EventManager.instance.dispatchEvent(SystemEvent.ScreenSizeChanged);
+			EventManager.instance.dispatchEvent(SystemEvents.ScreenSizeChanged);
 		});
 
 		ScreenHelper.hideCocosToolbar();

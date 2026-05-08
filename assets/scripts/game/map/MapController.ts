@@ -2,7 +2,8 @@
 import { Rect } from 'cc';
 import { EventManager } from '../../common/manager/EventManager';
 import { ECellState, MapConst } from '../../const/GameDefine';
-import { SystemEvent, TimeEvent } from '../../events';
+import { TimeEvent } from '../../events';
+import { SystemEvents } from '../../events/SystemEvents';
 import { BaseMVCController } from '../../mvc/BaseMVCController';
 import { CropEntityCtrl } from './crop_entity/CropEntityCtrl';
 import { GroundGridCtrl } from './ground_grid/GroundGridCtrl';
@@ -97,7 +98,7 @@ export class MapController extends BaseMVCController<MapModel, MapView>
         const boundsRect = new Rect(minX, minY, maxX - minX, maxY - minY);
 
         // 通过事件总线，通知给正在嗷嗷待哺的 CameraFollow
-        EventManager.getInstance().dispatchEvent(SystemEvent.MapBoundsChanged, {
+        EventManager.getInstance().dispatchEvent(SystemEvents.MapBoundsChanged, {
             bounds: boundsRect
         });
 

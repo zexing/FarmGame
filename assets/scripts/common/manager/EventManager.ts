@@ -36,7 +36,7 @@ const targetListenersMap = new WeakMap<object, IListenerInfo[]>();
  * @example
  * ```typescript
  * // ✅ 类型安全的事件(已在EventPayloads中定义)
- * EventManager.instance.dispatchEvent(SystemEvent.Update, 0.016);
+ * EventManager.instance.dispatchEvent(SystemEvents.Update, 0.016);
  * EventManager.instance.on(SystemEvent.Update, (dt) => {
  *     // dt 自动推导为 number 类型
  *     console.log(dt);
@@ -49,7 +49,7 @@ const targetListenersMap = new WeakMap<object, IListenerInfo[]>();
  * });
  * 
  * // ✅ 复杂参数类型
- * EventManager.instance.dispatchEvent(SystemEvent.ShakeCamera, {
+ * EventManager.instance.dispatchEvent(SystemEvents.ShakeCamera, {
  *     times: 3,
  *     strength: 10,
  *     duration: 0.03
@@ -167,15 +167,15 @@ export class EventManager extends SingletonManager {
      * @example
      * ```typescript
      * // ✅ 类型匹配
-     * EventManager.instance.dispatchEvent(SystemEvent.Update, 0.016);
-     * EventManager.instance.dispatchEvent(SystemEvent.ShakeCamera, {
+     * EventManager.instance.dispatchEvent(SystemEvents.Update, 0.016);
+     * EventManager.instance.dispatchEvent(SystemEvents.ShakeCamera, {
      *     times: 3,
      *     strength: 10
      * });
      * 
      * // ❌ 类型不匹配(编译错误)
-     * EventManager.instance.dispatchEvent(SystemEvent.Update, "invalid");
-     * EventManager.instance.dispatchEvent(SystemEvent.ShakeCamera, 123);
+     * EventManager.instance.dispatchEvent(SystemEvents.Update, "invalid");
+     * EventManager.instance.dispatchEvent(SystemEvents.ShakeCamera, 123);
      * ```
      */
     dispatchEvent<K extends keyof EventPayloadMap>(

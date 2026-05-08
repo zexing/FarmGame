@@ -2,7 +2,8 @@ import { ConfigManager } from '../../common/manager/ConfigManager';
 import { EventManager } from '../../common/manager/EventManager';
 import { ICropConfig } from '../../config/CropConfig';
 import { ECellState } from '../../const/GameDefine'; // 注意你的 ECellState 命名
-import { FarmEvent, SystemEvent } from '../../events';
+import { FarmEvent } from '../../events';
+import { SystemEvents } from '../../events/SystemEvents';
 import { InventoryManager } from '../inventory/InventoryManager';
 import { ICellData } from '../map/IMap';
 import { ITool, IToolContext } from './ITool';
@@ -26,7 +27,7 @@ export class SeedBagTool implements ITool {
 
         // 🎒 1. 检查背包里有没有足够的种子
         if (!InventoryManager.instance.hasEnough(this.currentSeedId, 1)) {
-            EventManager.instance.dispatchEvent(SystemEvent.GameTip, { msg: `背包中没有足够的种子！` });
+            EventManager.instance.dispatchEvent(SystemEvents.GameTip, { msg: `背包中没有足够的种子！` });
             return false;
         }
 
@@ -49,7 +50,7 @@ export class SeedBagTool implements ITool {
         cell.growStage = 0;
 
         EventManager.instance.dispatchEvent(FarmEvent.CellStateChanged, { row, col, newState: cell.state });
-        EventManager.instance.dispatchEvent(SystemEvent.GameTip, { msg: `成功种下了 1 颗 [${cropInfo.name}] 种子` });
+        EventManager.instance.dispatchEvent(SystemEvents.GameTip, { msg: `成功种下了 1 颗 [${cropInfo.name}] 种子` });
         return true;
     }
 }
