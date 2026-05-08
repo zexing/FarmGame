@@ -783,7 +783,7 @@
     },
     "_enabled": true,
     "__prefab": null,
-    "moveSpeed": 200,
+    "moveSpeed": 100,
     "hitboxWidth": 64,
     "hitboxHeight": 48,
     "joystick": {

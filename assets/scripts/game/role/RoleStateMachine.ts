@@ -1,8 +1,8 @@
 import { ERoleDir, ERoleState } from './IRole';
 
 export class RoleStateMachine { // 🌟 不再继承任何东西，纯净的 TS 类！
-    private _currentState: ERoleState = ERoleState.IDLE;
-    private _currentDir: ERoleDir = ERoleDir.DOWN;
+    private _currentState: ERoleState;
+    private _currentDir: ERoleDir;
 
     public get state() { return this._currentState; }
     public get dir() { return this._currentDir; }
