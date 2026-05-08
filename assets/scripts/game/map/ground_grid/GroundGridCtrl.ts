@@ -1,4 +1,4 @@
-import { _decorator, Node, Size, UITransform, view } from 'cc';
+import { _decorator, Node, UITransform, view } from 'cc';
 import { PoolManager } from 'db://assets/scripts/common/manager/PoolManager';
 import { ECellState, MapConst } from 'db://assets/scripts/const/GameDefine';
 import { createDefaultCellData, ICellData, IMapModel, IMapView } from 'db://assets/scripts/game/map/IMap';
@@ -62,7 +62,7 @@ export class GroundGridCtrl extends BaseMVCSubCtrl {
 
     private _onCellStateChanged(payload: { row: number, col: number, newState: ECellState }): void {
         const { row, col, newState } = payload;
-        const key = `${row},${col}`;
+        const key = `${row}_${col}`;
 
         const cellData = this._model.getCellData(row, col);
         if (cellData) {
@@ -137,7 +137,7 @@ export class GroundGridCtrl extends BaseMVCSubCtrl {
     }
 
     public refreshCell(row: number, col: number, cellData: ICellData): void {
-        const key = `${row},${col}`;
+        const key = `${row}_${col}`;
         const node = this._activeNodes.get(key);
         if (node) {
             const cellComp = node.getComponent(GroundGridCell);
@@ -206,39 +206,55 @@ export class GroundGridCtrl extends BaseMVCSubCtrl {
     }
 
     /**
-         * 🌟 核心算法：基于逻辑中心的动态半径扩散 + 隐藏的矩形裁剪
-         */
+     * 🌟 终极算法：纯逻辑驱动的虚拟四角包裹法 (硬核日志诊断版)
+     */
     private _getVisibleKeysByRadius(centerRow: number, centerCol: number): Set<string> {
         const newVisibleKeys = new Set<string>();
-        // 1. 正确的物理世界视口大小
-        const viewSize = new Size(view.getVisibleSize().width * this._currentZoomRatio, view.getVisibleSize().height * this._currentZoomRatio);
+        const visibleSize = view.getVisibleSize();
 
-        // 🌟 2. 优化遍历半径计算
-        // 没必要用勾股定理求对角线，把宽高分别除以格子的宽高尺寸，得出 x 和 y 方向的格子跨度，取最大值即可
-        const spanX = (viewSize.width / 2) / MapConst.CELL_WIDTH;
-        const spanY = (viewSize.height / 2) / MapConst.CELL_HEIGHT;
-        // 半径 = 最大跨度 + 2层余量
-        const view_cells_count = Math.ceil(spanX + spanY) + 2;
+        // 1. 计算世界视口真实尺寸
+        const worldViewW = visibleSize.width * this._currentZoomRatio;
+        const worldViewH = visibleSize.height * this._currentZoomRatio;
 
-        // 3. 框出逻辑遍历范围
-        let minR = Math.max(0, centerRow - view_cells_count);
-        let maxR = Math.min(this._model.rows - 1, centerRow + view_cells_count);
-        let minC = Math.max(0, centerCol - view_cells_count);
-        let maxC = Math.min(this._model.cols - 1, centerCol + view_cells_count);
-
-        // 4. AABB 裁剪中心点 (整数格子的中心)
+        // 2. 虚拟物理中心点
         const centerWorldPos = IsoUtils.isoToScreen(centerRow, centerCol);
 
-        // 🌟 5. 核心修复：加大 Padding 掩盖跳跃！
-        // 因为 centerWorldPos 是离散跳跃的，当玩家走到格子最边缘时，距离中心点最多偏离一个 CELL_WIDTH/HEIGHT。
-        // 所以这里的容错 Padding 必须加大到 1.5 ~ 2 个格子尺寸，才能保证边缘绝不闪烁！
-        const halfW = viewSize.width / 2 + MapConst.CELL_WIDTH * 2;
-        const halfH = viewSize.height / 2 + MapConst.CELL_HEIGHT * 2;
+        // 3. 计算加上安全边距后的虚拟屏幕边界
+        const paddingX = MapConst.CELL_WIDTH * 2;
+        const paddingY = MapConst.CELL_HEIGHT * 2;
+
+        const left = centerWorldPos.x - worldViewW / 2 - paddingX;
+        const right = centerWorldPos.x + worldViewW / 2 + paddingX;
+        const top = centerWorldPos.y + worldViewH / 2 + paddingY;
+        const bottom = centerWorldPos.y - worldViewH / 2 - paddingY;
+
+        // 4. 降维打击：利用虚拟屏幕的 4 个角，逆推绝对精准的逻辑网格极限！
+        const tl = IsoUtils.screenToIso(left, top);
+        const tr = IsoUtils.screenToIso(right, top);
+        const bl = IsoUtils.screenToIso(left, bottom);
+        const br = IsoUtils.screenToIso(right, bottom);
+
+        // 5. 获得绝对精确的逻辑包围盒
+        let minR = Math.min(tl.row, tr.row, bl.row, br.row);
+        let maxR = Math.max(tl.row, tr.row, bl.row, br.row);
+        let minC = Math.min(tl.col, tr.col, bl.col, br.col);
+        let maxC = Math.max(tl.col, tr.col, bl.col, br.col);
+
+        // 限制在地图边界内
+        minR = Math.max(0, minR);
+        maxR = Math.min(this._model.rows - 1, maxR);
+        minC = Math.max(0, minC);
+        maxC = Math.min(this._model.cols - 1, maxC);
+
+        // 6. 精确遍历与 AABB 尖角裁切
+        const halfW = worldViewW / 2 + paddingX;
+        const halfH = worldViewH / 2 + paddingY;
+
+        let totalLooped = 0; // 用于统计性能
 
         for (let r = minR; r <= maxR; r++) {
             for (let c = minC; c <= maxC; c++) {
-
-                // 剔除超出物理屏幕的菱形尖角（强力省 DrawCall！）
+                totalLooped++;
                 const pos = IsoUtils.isoToScreen(r, c);
                 if (Math.abs(pos.x - centerWorldPos.x) > halfW ||
                     Math.abs(pos.y - centerWorldPos.y) > halfH) {
@@ -249,8 +265,22 @@ export class GroundGridCtrl extends BaseMVCSubCtrl {
             }
         }
 
+        // // ==========================================
+        // // 🔴 核心诊断日志 (Diagnostic Logs) 🔴
+        // // ==========================================
+        // console.group(`[GroundGridCtrl] 视口刷新诊断 @ Zoom: ${this._currentZoomRatio.toFixed(2)}`);
+        // console.log(`1. 输入参数 -> 逻辑中心: [${centerRow}, ${centerCol}], 缩放值(Zoom): ${this._currentZoomRatio}`);
+        // console.log(`2. 屏幕尺寸 -> VisibleSize: [${visibleSize.width} x ${visibleSize.height}]`);
+        // console.log(`3. 世界视窗 -> WorldView: [${worldViewW.toFixed(1)} x ${worldViewH.toFixed(1)}] (按乘法计算)`);
+        // console.log(`4. 物理边界 -> L:${left.toFixed(0)}, R:${right.toFixed(0)}, T:${top.toFixed(0)}, B:${bottom.toFixed(0)}`);
+        // console.log(`5. 逆推四角 -> TL:[${tl.row},${tl.col}], TR:[${tr.row},${tr.col}], BL:[${bl.row},${bl.col}], BR:[${br.row},${br.col}]`);
+        // console.log(`6. 逻辑盒子 -> Row范围: ${minR} 到 ${maxR}, Col范围: ${minC} 到 ${maxC}`);
+        // console.log(`7. 遍历统计 -> 双层循环次数: ${totalLooped}, 实际保留格子(DrawCall): ${newVisibleKeys.size}`);
+        // console.groupEnd();
+
         return newVisibleKeys;
     }
+
     /**
      * 🌟 终极排序方案：Y-Sorting (解决动态加载时的遮挡问题)
      * 等轴测(Isometric)视角下，Y轴坐标越小（越靠下），应当越后渲染（盖在上方）
